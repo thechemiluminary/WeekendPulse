@@ -1,19 +1,18 @@
-name: WeekendPulse Deploy
+name: WeekendPulse Match Preview
 
 on:
   schedule:
-    # HOURLY daytime check-ins, UK 08:00-23:00 (BST, UTC+1).
-    # Bot posts ONLY when a genuinely new story appears; otherwise no_content.
-    # NOTE: cron runs in UTC. Hour 7-22 UTC = 08:00-23:00 UK while UK is in BST.
-    # When UK clocks go back to GMT (UTC+0) in late Oct, shift to "0 8-23 * * *".
-    - cron: "0 7-22 * * *"
+    # Daily at 00:00 UTC (01:00 UK during BST). Fetches today's PL fixtures and
+    # schedules a comment-bait post 5h before each kickoff via the Graph API
+    # (published=false + scheduled_publish_time). Each fixture posts once.
+    - cron: "0 0 * * *"
   workflow_dispatch:        # allow manual trigger for testing
 
 jobs:
-  post:
+  match:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo (so posts_log.csv can be committed)
+      - name: Checkout repo (so manifest.json can be committed)
         uses: actions/checkout@v4
         with:
           persist-credentials: true
@@ -26,19 +25,20 @@ jobs:
       - name: Install dependencies
         run: pip install requests feedparser Pillow google-genai
 
-      - name: Run the bot (scrape -> AI -> post -> log)
+      - name: Run match-preview scheduler (fetch fixtures -> schedule posts)
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
           DRY_RUN: "0"
-        run: python main.py
+        run: python main.py --match-preview
 
       - name: Commit and push manifest.json if changed
         run: |
           git config user.name "WeekendPulse Bot"
           git config user.email "bot@weekendpulse.local"
           git add manifest.json
-          git commit -m "chore: update manifest [skip ci]" || echo "No changes to manifest"
+          git commit -m "chore: update manifest (match previews) [skip ci]" || echo "No changes to manifest"
           git push origin HEAD:main || echo "Nothing to push / push failed"

@@ -183,19 +183,60 @@ CODE DONE (2026-09-02):
       - story_src/align.py + enhance.py (reused from ScaryTales, no secret dumps)
       - reel_assemble.py (builds news_reel.ipynb; base64-embeds story_src)
       - reel_validate.py (NOT needed to import torch/flask)
-[ x ] news_reel.ipynb built (7 cells: intro, install, write-src, assets, render, preview, download)
+[ x ] news_reel.ipynb built (8 cells: intro, install, write-src, assets, render, preview, download, post)
 [ x ] reel_batch.collect_batch unit-verified (today-only, sanitize emotion, cap blurb, newest first)
 [ x ] reel_validate ALL PASS; notebook decodes + modules parse OK
+[ x ] manifest.json is the single source of truth (replaces posts_log.csv):
+      - manifest.py (atomic R/W; bot records post_id/title/description/reel approval)
+      - main.py + post.yml write manifest.json (not posts_log.csv)
+      - reel_batch.py reads manifest, skips reel_posted entries
+      - reel_render.py summary now reports voice + emotion; adds voice key
+      - 07_post.py Colab cell posts reels via Graph videos endpoint, writes back
+        voice/emotion/video_id/posted into manifest.json (needs FB token + GH token)
+      - reel_validate extended with manifest + post checks (ALL PASS)
 
 NEXT:
-[   ] (user to provide) outro/outro.mp4 + loopable music files into music/
 [   ] Open news_reel.ipynb in Colab (T4 GPU), run cells, sanity-render 1 reel
-[   ] Commit + push this reel Phase to GitHub (A1-A7 + music/ + outro/ + builder_reel/)
+[   ] Commit + push this reel+manifest Phase to GitHub (A1-A8 + music/ + outro/ + builder_reel/ + manifest/)
 [   ] Wire reel Emotion variants (10 voices x excited/surprised exported clips) if desired
 
 =====================================================================
-PHASE 4 - MONITORING & REFINEMENT
+PHASE 3c - MATCH-PREVIEW SCHEDULED POSTS (per user)
 =====================================================================
+Goal: a SEPARATE, second post type. At 00:00 UTC daily the bot fetches today's
+PL fixtures and SCHEDULES a comment-bait post 5 hours before each kickoff
+(regular Facebook post with real club crests - NOT a reel).
+
+DECISIONS (all locked 2026-09-03):
+- Regular Facebook post (image + caption), NOT a reel.
+- Ran at MIDNIGHT (00:00 UTC), independent of the hourly news cron.
+- Source: football-data.org v4 free tier (PL, code "PL"), X-Auth-Token header.
+- Prints real club crests from crests.football-data.org/<id>.png on a VS card.
+- Schedules via Graph API /feed with published=false + scheduled_publish_time
+  (BOTH required together - if published defaults true the schedule is silently
+  ignored and it posts immediately). Window: 10 min .. 30 days out.
+- Scheduled to fire `MATCH_POST_HOURS_BEFORE` (=5) hours before kickoff.
+- Skips kickoffs less than 5h away (avoid posting a match about to start).
+- DEDUP: each fixture posts once (match_key HOMETLA-vs-AWYTLA-DATE in manifest).
+
+CODE DONE (2026-09-03):
+[ x ] fixtures.py - get_today_fixtures() + match_key(); graceful [] on error/no token
+[ x ] prompts/match_post.txt - comment-bait fixture prompt -> JSON {post_text}
+[ x ] ai_processor.turn_fixture_into_post() (Gemini>Groq, template fallback)
+[ x ] match_card.py - 1080x1350 VS card w/ real crests + kickoff; color fallback
+[ x ] publisher.schedule_post() - /feed published=false + scheduled_publish_time
+[ x ] manifest.append_match_entry() + already_posted_fixture() (match_key dedup)
+[ x ] main.py run_match_preview() + `python main.py --match-preview` flag
+[ x ] config.py FOOTBALL_* + MATCH_* constants
+[ x ] .github/workflows/match_preview.yml - cron "0 0 * * *", commits manifest
+[ x ] scraper import made lazy so --match-preview needs no feedparser at runtime
+[ x ] py_compile ALL OK; no-token & bad-token paths graceful; crests verified live
+
+NEXT:
+[   ] Add FOOTBALL_API_TOKEN to GitHub repo secrets (USER - set in secrets.txt)
+[   ] Commit + push Phase 3c (+ pending manifest/reels Phase) to main
+[   ] Manual workflow_dispatch on match_preview.yml to verify scheduling fires
+
 [   ] Week 1: check engagement (likes/comments/shares) on posts
 [   ] Identify which post types perform best
 [   ] Tune AI prompt (prompts/debate_post.txt) based on results

@@ -119,12 +119,41 @@ def test_batch_contract():
     check("emotion sanitize", ems == ["excited", "neutral"])
 
 
+def test_manifest_and_post():
+    """New: manifest.json is the shared source of truth; renderer reports voice;
+    a posting cell uploads reels via the videos endpoint and writes back."""
+    root = HERE.parent
+    check("manifest.py exists", (root / "manifest.py").exists())
+    man = (root / "manifest.py").read_text(encoding="utf-8")
+    check("manifest has belly_good keys",
+          all(k in man for k in ["reel_approved", "reel_posted", "reel_video_id",
+                                 "reel_voice", "update_reel", "reel_pending"]))
+    batch = (root / "reel_batch.py").read_text(encoding="utf-8")
+    check("reel_batch reads manifest + skips posted",
+          "manifest.reel_pending" in batch and "reel_posted" in batch
+          and "posts_log" not in batch and "read_log" not in batch)
+    main = (root / "main.py").read_text(encoding="utf-8")
+    check("main.py uses manifest (no post_log)",
+          "append_post_entry" in main and "post_log" not in main
+          and "append_post(" not in main)
+    render = (HERE / "story_src" / "reel_render.py").read_text(encoding="utf-8")
+    check("renderer reports voice", '"voice"' in render)
+    post_cell = (HERE / "07_post.py").read_text(encoding="utf-8")
+    check("post cell posts via videos endpoint",
+          "/videos" in post_cell and "FB_PAGE_TOKEN" in post_cell
+          and "GH_TOKEN" in post_cell)
+    check("post cell writes manifest back to repo",
+          "api.github.com" in post_cell and "manifest" in post_cell.lower()
+          and "reel_posted" in post_cell)
+
+
 if __name__ == "__main__":
     test_assemble()
     test_src_parse()
     test_renderer_logic()
     test_assets()
     test_batch_contract()
+    test_manifest_and_post()
     print()
     if fails:
         print("FAILURES:", fails)

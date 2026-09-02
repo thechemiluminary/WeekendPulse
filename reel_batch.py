@@ -1,8 +1,9 @@
 """
 WeekendPulse - Reel batch builder.
-Reads the committed posts_log.csv, picks the articles posted "today" whose AI
-verdict set reel_worthy=yes, and writes a reels_batch.txt manifest that the Colab
-news_reel notebook consumes to render one short reel per entry (N -> N).
+Reads the committed manifest.json, picks the articles "today" that are
+reel_approved AND not yet posted as a reel (reel_posted false), and writes a
+reels_batch.txt manifest that the Colab news_reel notebook consumes to render
+one short reel per entry (N -> N).
 
 Usage:
     python reel_batch.py            # build reels_batch.txt from today's posts
@@ -13,10 +14,10 @@ import os
 import sys
 from datetime import datetime, timezone
 
-from config import BASE_DIR, REEL_EMOTIONS, REEL_MAX_PER_RUN, REEL_BLURB_MAX_WORDS
-from post_log import read_log, LOG_PATH
+import manifest
+from config import REEL_EMOTIONS, REEL_MAX_PER_RUN, REEL_BLURB_MAX_WORDS, MANIFEST_PATH
 
-BATCH_PATH = os.path.join(BASE_DIR, "reels_batch.txt")
+BATCH_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reels_batch.txt")
 DRY_RUN = os.environ.get("DRY_RUN", "0") == "1"
 
 
@@ -51,28 +52,28 @@ def _sanitize_blurb(blurb):
     return blurb
 
 
-def collect_batch(posts=None):
+def collect_batch(rows=None):
     """
-    Return the list of reel-eligible entries from the post log.
-    Each entry: {slug, title, image_url, reel_emotion, reel_blurb, post_text, url}.
-    Uses only today's posted stories with reel_worthy=yes, newest first, capped.
+    Return the list of reel-eligible entries from the manifest.
+    Selects entries that are reel_approved AND not yet posted as a reel
+    (reel_posted false), which are "today" (within REEL_DAYS_BACK), newest
+    first, capped at REEL_MAX_PER_RUN.
+    Each output entry: {slug, title, image_url, reel_emotion, reel_blurb,
+                        post_text, url, posted_at}.
     """
-    posts = posts if posts is not None else read_log()
+    rows = rows if rows is not None else manifest.reel_pending()
     entries = []
-    for row in posts:
-        if row.get("reel_worthy", "").strip().lower() != "yes":
-            continue
+    for row in rows:
         if not _posted_today(row):
             continue
-        # slug: a URL-ish unique id for the reel (stable-ish, from url or title)
-        slug = _slug_for(row)
+        slug = row.get("slug") or manifest._slug_for(row.get("url"), row.get("title"))
         if not slug:
             continue
         entries.append({
             "slug": slug,
             "title": row.get("title", "") or "",
             "url": row.get("url", "") or "",
-            "post_text": row.get("title", "") or "",
+            "post_text": row.get("description", "") or row.get("title", "") or "",
             "image_url": row.get("image_url", "") or "",
             "reel_emotion": _sanitize_emotion(row.get("reel_emotion", "neutral")),
             "reel_blurb": _sanitize_blurb(row.get("reel_blurb", "")),
@@ -81,17 +82,6 @@ def collect_batch(posts=None):
     # newest first (latest posted_at), cap it
     entries = sorted(entries, key=lambda e: e.get("posted_at", ""), reverse=True)
     return entries[:REEL_MAX_PER_RUN]
-
-
-def _slug_for(row):
-    url = (row.get("url") or "").strip()
-    if url:
-        base = url.rstrip("/").rsplit("/", 1)[-1]
-        base = "".join(c for c in base if c.isalnum() or c in "-_") or "reel"
-        return base[:40]
-    title = (row.get("title") or "").strip().lower()
-    words = [w for w in title.replace("-", " ").split() if w]
-    return ("-".join(words[:5])[:40]) or "reel"
 
 
 def write_batch(entries):
@@ -108,8 +98,8 @@ def write_batch(entries):
 
 def main():
     entries = collect_batch()
-    print(f"posts_log rows on disk: {len(read_log())}")
-    print(f"reel-worthy today: {len(entries)}")
+    print(f"manifest entries on disk: {len(manifest.load_manifest())}")
+    print(f"reel-approved + not-yet-posted today: {len(entries)}")
     for e in entries:
         print(f"  - [{e['reel_emotion']}] {e['title'][:60]}")
     if DRY_RUN:

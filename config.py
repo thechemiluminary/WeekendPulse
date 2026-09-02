@@ -58,10 +58,22 @@ REEL_ACCENT_COLOR = "#FF6B00"      # vibrant orange
 REEL_WHITE = "#FFFFFF"
 REEL_DAYS_BACK = 1                 # only today's posted stories are reel-eligible
 
+# --- Facebook Graph API ---
+GRAPH_BASE = os.environ.get("GRAPH_BASE", "https://graph.facebook.com/v26.0")
+
+# --- Fixtures / match-preview posts ---
+FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
+FOOTBALL_BASE_URL = os.environ.get("FOOTBALL_BASE_URL", "https://api.football-data.org/v4")
+FOOTBALL_COMPETITION = os.environ.get("FOOTBALL_COMPETITION", "PL")
+MATCH_POST_HOURS_BEFORE = int(os.environ.get("MATCH_POST_HOURS_BEFORE", "5"))
+MATCH_POST_MAX_PER_DAY = int(os.environ.get("MATCH_POST_MAX_PER_DAY", "10"))
+
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "weekendpulse.db")
+MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
 PROMPT_PATH = os.path.join(BASE_DIR, "prompts", "debate_post.txt")
+MATCH_PROMPT_PATH = os.path.join(BASE_DIR, "prompts", "match_post.txt")
 FONT_DIR = os.path.join(BASE_DIR, "data", "fonts")
 IMAGE_DIR = os.path.join(BASE_DIR, "data", "images")
 

@@ -2,20 +2,30 @@
 WeekendPulse - Orchestrator.
 Flow: init db -> scrape feeds -> publish ONE freshly-scraped (FUTURE) article only
       -> AI post -> publish to Facebook (real article photo, else text)
-      -> mark posted -> append to posts_log.csv.
+      -> mark posted -> append to manifest.
 Only articles scraped during THIS run are eligible; old backlog is never reused.
+
+Separate entry point: `python main.py --match-preview` runs the midnight
+match-preview job - fetch today's PL fixtures and schedule a comment-bait post
+5 hours before each kickoff (published=false + scheduled_publish_time).
 """
 import json
+import sys
+import datetime
+import time
 
 import config
 from db import init_db, get_conn, mark_posted as _mark_posted
-from scraper import scrape_all, select_postable
-from ai_processor import turn_article_into_post_json
-from publisher import post_text, post_text_with_image_url
-from post_log import append_post, posted_titles
+from ai_processor import turn_article_into_post_json, turn_fixture_into_post
+from publisher import post_text, post_text_with_image_url, schedule_post
+import manifest
+from manifest import append_post_entry, posted_titles
+import fixtures as fixtures_mod
 
 
 def run(include_image=True):
+    from scraper import scrape_all, select_postable
+
     init_db()
     conn = get_conn()
 
@@ -70,9 +80,9 @@ def run(include_image=True):
 
     if ok:
         _mark_posted(conn, article["id"], result)
-        log_path = append_post(result, article, image_used=(attach == "image"), reel_meta=reel_meta)
+        log_path = append_post_entry(result, article, reel_meta=reel_meta)
         print(f"[main] posted OK ({attach}): {result}")
-        print(f"[main] logged to {log_path}")
+        print(f"[main] recorded in {log_path}")
         return {
             "status": "posted",
             "provider": provider,
@@ -85,7 +95,84 @@ def run(include_image=True):
         return {"status": "error", "error": result}
 
 
+def run_match_preview():
+    """
+    Midnight match-preview job: fetch today's PL fixtures and schedule a
+    comment-bait post 5h before each kickoff. Dedupes per fixture so each
+    match is scheduled exactly once. Fully independent of the news bot - a
+    fixture failure never blocks anything else.
+    """
+    import match_card
+
+    init_db()
+    if not config.FOOTBALL_API_TOKEN:
+        return {"status": "no_token"}
+    if config.DRY_RUN:
+        print("[match] DRY_RUN - running fixture fetch + dedup only")
+        fxs = fixtures_mod.get_today_fixtures()
+        return {"status": "dry_run", "fixtures": len(fxs)}
+
+    fxs = fixtures_mod.get_today_fixtures()
+    if not fxs:
+        return {"status": "no_fixtures_today"}
+
+    hours_before = config.MATCH_POST_HOURS_BEFORE
+    now = datetime.datetime.now(datetime.timezone.utc)
+    scheduled, skipped = [], []
+    for fx in fxs:
+        try:
+            mk = fixtures_mod.match_key(fx)
+        except Exception:
+            mk = ""
+        fx["match_key"] = mk
+
+        if manifest.already_posted_fixture(mk):
+            skipped.append({"fixture": mk, "reason": "already_posted"})
+            continue
+
+        kickoff = fx.get("utc_kickoff")
+        if not kickoff:
+            skipped.append({"fixture": mk, "reason": "no_kickoff"})
+            continue
+        # Only schedule matches whose kickoff is MORE than `hours_before` away.
+        if kickoff - now < datetime.timedelta(hours=hours_before):
+            skipped.append({"fixture": mk, "reason": "too_soon_or_started"})
+            continue
+
+        try:
+            scheduled_unix = int(kickoff.timestamp()) - hours_before * 3600
+            label = kickoff.strftime("%H:%M UK")
+            img = match_card.make_match_card(fx, label, out_name=f"match_{mk.replace('/','_')}.png")
+            res = turn_fixture_into_post(
+                fx.get("home"), fx.get("away"), fx.get("venue"),
+                fx.get("matchday"), label,
+            )
+            post_text_value = res["post_text"]
+            ok, post_id = schedule_post(post_text_value, img, scheduled_unix)
+            if ok:
+                manifest.append_match_entry(fx, post_id, scheduled_unix)
+                scheduled.append({"fixture": mk, "post_id": post_id,
+                                  "at": datetime.datetime.fromtimestamp(
+                                      scheduled_unix, datetime.timezone.utc).isoformat()})
+            else:
+                skipped.append({"fixture": mk, "reason": f"publish_failed:{post_id}"})
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            skipped.append({"fixture": mk, "reason": str(e)})
+
+        if len(scheduled) >= config.MATCH_POST_MAX_PER_DAY:
+            break
+
+    return {"status": "done", "scheduled": scheduled, "skipped": skipped}
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--match-preview":
+        result = run_match_preview()
+        print(json.dumps(result, default=str))
+        sys.exit(0)
+
     ok = bool(config.FB_PAGE_TOKEN)
     if not ok:
         print("WARNING: FB_PAGE_TOKEN empty - set env var. Use DRY_RUN=1 to test scrape+AI only.")

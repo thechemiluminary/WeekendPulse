@@ -21,7 +21,7 @@ HERE = Path(__file__).parent
 STORY_SRC = HERE / "story_src"
 OUT_CELLS = [
     "02_install.py", "03_assets.py", "04_render.py",
-    "05_preview.py", "06_download.py",
+    "05_preview.py", "06_download.py", "07_post.py",
 ]
 MDS = ["01_intro.md"]
 

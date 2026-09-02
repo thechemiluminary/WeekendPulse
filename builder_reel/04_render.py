@@ -22,7 +22,7 @@ t_start = time.time()
 results = reel_render.render_all(entries)
 print("\n=== SUMMARY ===")
 for r in results:
-    print(f"  {r['slug']:<30} {r['duration_s']:>5.1f}s  emotion={r['emotion']:<9} music={r['music']}")
+    print(f"  {r['slug']:<30} {r['duration_s']:>5.1f}s  voice={r.get('voice','?'):<16} emotion={r['emotion']:<9} music={r['music']}")
 
 # persist summaries for the preview cell
 (REEL_ROOT / "rendered_results.json").write_text(

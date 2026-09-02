@@ -482,8 +482,9 @@ def render_reel(entry, say=print):
 
     tl = _audio_dur(out)
     say(f"[{slug}] DONE {tl:.1f}s in {time.time() - t0:.1f}s")
+    voice_name = voice_file.rsplit("/", 1)[0] if voice_file else ""
     summary = {"slug": slug, "title": title, "emotion": emotion_used,
-               "music": music, "duration_s": round(tl, 1)}
+               "voice": voice_name, "music": music, "duration_s": round(tl, 1)}
     return out, summary
 
 

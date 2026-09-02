@@ -85,3 +85,30 @@ def post_text_with_image(message, image_path):
     if resp.status_code == 200 and ("id" in j or "post_id" in j):
         return True, j.get("post_id") or j.get("id")
     return False, j
+
+
+def schedule_post(message, image_path, scheduled_unix):
+    """
+    Schedule a photo + caption to go LIVE at scheduled_unix (Unix seconds).
+    Uses the /feed endpoint with published=false + scheduled_publish_time.
+    BOTH fields MUST be sent together - if published defaults to true the
+    schedule is silently ignored and the post goes live immediately.
+
+    Publish window is 10 minutes .. 30 days from the request. Returns
+    (ok, post_id_or_error).
+    """
+    with open(image_path, "rb") as f:
+        content = f.read()
+    url = f"{GRAPH}/{FB_PAGE_ID}/feed"
+    files = {"source": content}
+    data = {
+        "message": message,
+        "published": "false",
+        "scheduled_publish_time": str(int(scheduled_unix)),
+    }
+    head = _headers()
+    resp = requests.post(url, data=data, files=files, headers=head, timeout=120)
+    j = resp.json()
+    if resp.status_code == 200 and ("id" in j or "post_id" in j):
+        return True, j.get("post_id") or j.get("id")
+    return False, j

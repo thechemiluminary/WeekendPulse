@@ -6,11 +6,18 @@ Reads the fixed prompt template from prompts/debate_post.txt.
 """
 import json
 
-from config import GEMINI_API_KEY, GROQ_API_KEY, GROQ_MODEL, GEMINI_MODEL, PROMPT_PATH
+from config import (
+    GEMINI_API_KEY, GROQ_API_KEY, GROQ_MODEL, GEMINI_MODEL, PROMPT_PATH, MATCH_PROMPT_PATH,
+)
 
 
 def _load_prompt_template():
     with open(PROMPT_PATH, "r", encoding="utf-8") as f:
+        return f.read().strip()
+
+
+def _load_match_prompt_template():
+    with open(MATCH_PROMPT_PATH, "r", encoding="utf-8") as f:
         return f.read().strip()
 
 
@@ -176,3 +183,53 @@ def turn_article_into_post(title, summary):
     """
     result = turn_article_into_post_json(title, summary)
     return result["post_text"], result["provider"]
+
+
+def turn_fixture_into_post(home, away, venue, matchday, kickoff_local):
+    """
+    Generate a comment-bait match-preview post for a fixture.
+    Returns a dict {post_text, provider}. Falls back to a plain template-driven
+    line if both AI providers fail, so the scheduler NEVER crashes.
+    """
+    template = _load_match_prompt_template()
+    prompt = (
+        template
+        .replace("{home}", home or "")
+        .replace("{away}", away or "")
+        .replace("{venue}", venue or "")
+        .replace("{matchday}", str(matchday or ""))
+        .replace("{kickoff_local}", kickoff_local or "")
+    )
+
+    raw = None
+    provider = None
+    if GEMINI_API_KEY:
+        try:
+            raw = _generate_with_gemini(prompt)
+            provider = "gemini"
+        except Exception as e:
+            print(f"[ai] Gemini failed (fixture): {e}")
+    if not raw and GROQ_API_KEY:
+        try:
+            raw = _generate_with_groq(prompt)
+            provider = "groq"
+        except Exception as e:
+            print(f"[ai] Groq failed (fixture): {e}")
+
+    if raw:
+        data = _parse_json_result(raw)
+        if data is not None:
+            text = (data.get("post_text") or "").strip()
+            if text:
+                return {"post_text": text, "provider": provider}
+        return {"post_text": raw.strip(), "provider": provider}
+
+    # Hard safe fallback: fixed comment-bait template (never crashes the run).
+    return {
+        "post_text": (
+            f"{home} clash with {away} at {venue or 'their ground'} tonight.\n\n"
+            f"Who takes all three points? Drop your call in the comments \ud83d\udc47\n\n"
+            f"#WeekendPulse #PremierLeague"
+        ),
+        "provider": "template",
+    }
