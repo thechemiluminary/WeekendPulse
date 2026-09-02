@@ -2,6 +2,7 @@
 WeekendPulse - SQLite database helpers.
 Tracks scraped articles + whether they've been posted (prevents reposting).
 """
+import os
 import sqlite3
 from datetime import datetime
 from config import DB_PATH
@@ -9,6 +10,10 @@ from config import DB_PATH
 
 def get_conn():
     """Return a connection with row access as dicts."""
+    # Ensure the DB parent directory exists (CI starts with a clean checkout).
+    parent = os.path.dirname(DB_PATH)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
