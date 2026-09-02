@@ -67,3 +67,11 @@ def already_posted(url):
         if row.get("url", "").strip() == url:
             return True
     return False
+
+
+def posted_titles():
+    """
+    Return the titles (and URLs) of every story already published, for fuzzy
+    story-level dedup across runs. Stored so repeated calls are cheap.
+    """
+    return [row.get("title", "") or "" for row in read_log()]

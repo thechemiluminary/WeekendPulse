@@ -40,6 +40,13 @@ PL_KEYWORDS = [
 MAX_POSTS_PER_RUN = 1          # one post per scheduled run (5 runs/day)
 DRY_RUN = os.environ.get("DRY_RUN", "0") == "1"
 
+# --- Cross-source story dedup ---
+# Two headlines count as the SAME story when they (a) share a real player/club
+# name AND (b) reach this SequenceMatcher similarity ratio. This stops BBC/Sky/
+# Guardian/FourFourTwo covering one story from being posted more than once.
+# Raise to dedup harder (fewer posts), lower to allow more distinct posts.
+DEDUP_THRESHOLD = float(os.environ.get("DEDUP_THRESHOLD", "0.3"))
+
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "weekendpulse.db")

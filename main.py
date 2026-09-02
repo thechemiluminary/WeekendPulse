@@ -9,10 +9,10 @@ import json
 
 import config
 from db import init_db, get_conn, mark_posted as _mark_posted
-from scraper import scrape_all
+from scraper import scrape_all, select_postable
 from ai_processor import turn_article_into_post
 from publisher import post_text, post_text_with_image_url
-from post_log import append_post
+from post_log import append_post, posted_titles
 
 
 def run(include_image=True):
@@ -32,8 +32,14 @@ def run(include_image=True):
         print("[main] no freshly-scraped articles - nothing to do.")
         return {"status": "no_content"}
 
-    # 2. Pick the newest fresh article (scrape_all returns newest first).
-    article = fresh[0]
+    # 2. Pick the first fresh article that is NOT a duplicate of an already-posted
+    #    story (or of another magazine in this same batch). Everything duplicating
+    #    an earlier post is skipped; if all are dups, post nothing.
+    article = select_postable(conn, fresh, posted_titles())
+    if article is None:
+        print("[main] all fresh articles duplicate already-posted stories - nothing to do.")
+        return {"status": "no_content"}
+
     title = article["title"]
     summary = article["summary"] or ""
     image_url = article["image_url"] if article.keys() and "image_url" in article.keys() else None

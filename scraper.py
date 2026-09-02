@@ -29,6 +29,78 @@ def _matches_pl(title, summary):
     return any(kw in text for kw in config.PL_KEYWORDS)
 
 
+# "Bleached" / stop words: the most common noise in football headlines that should
+# not count toward story similarity. Source-independent and club-agnostic.
+_STOPWORDS = {
+    "the", "a", "an", "and", "or", "but", "for", "with", "without", "news",
+    "could", "would", "should", "will", "still", "yet", "set", "now", "this",
+    "vs", "v", "premier", "league", "summer", "window", "report", "reports",
+    "preview", "no", "way", "on", "off", "out", "up", "down", "watch", "live",
+    "how", "to", "free", "stream", "streams", "tv", "channels", "channel",
+    "get", "your", "of", "in", "is", "at", "from", "be", "been", "after",
+    "before", "as", "over", "into", "they", "their", "him", "his", "her",
+    "we", "you", "us", "them", "s", "t", "d", "ll", "re", "ve",
+}
+
+
+# Capitalised words that regex will wrongly treat as proper-noun/entity names.
+# These are common headline words, not players/clubs, and must not count toward
+# "same story" matching. Otherwise long series titles (e.g. Guardian's "No 8/9")
+# would falsely collapse into one story.
+_NON_ENTITY_NAMES = {
+    "No", "League", "Super", "Women", "Premier", "News", "Report", "Reports",
+    "Video", "Watch", "Live", "Best", "Worst", "Biggest", "Top", "First", "New",
+    "Club", "Star", "Striker", "Manager", "Way", "How", "Preview", "Transfer",
+    "Window", "Summer", "Wins", "Win", "Weekend", "Final", "Free", "Stream",
+    "Streams", "TV", "Channels", "Everything", "Three", "Things", "World",
+    "Title", "Now", "Why", "Man", "Great", "Key", "Next", "Verdict", "Rating",
+}
+
+
+def key_names(title):
+    """
+    Return the set of proper-noun-ish tokens in a headline (player/club names),
+    minus common non-entity words. This is the main "same story" signal -
+    two headlines describing one story share the player/team involved.
+    """
+    title = title or ""
+    names = set(re.findall(r"\b([A-Z][a-zA-Z]+)\b", title))
+    return names - _NON_ENTITY_NAMES
+
+
+def story_similar(title_a, title_b, threshold=None):
+    """
+    Fuzzy story match: do two headlines describe the SAME story?
+    TRUE only when BOTH hold:
+      1. They share at least one real proper-noun (player/club) name, AND
+      2. Overall phrasing similarity (SequenceMatcher ratio) is high enough.
+    This catches "same story, different magazine" (BBC/Sky/Guardian/...) while
+    not collapsing genuinely distinct stories that merely share a club name.
+    """
+    title_a = title_a or ""
+    title_b = title_b or ""
+    ka = key_names(title_a)
+    kb = key_names(title_b)
+    if not ka or not kb:
+        return False  # need identifiable names on both sides to call it a match
+    if not (ka & kb):
+        return False  # different player/club involved -> not the same story
+    from difflib import SequenceMatcher
+    ratio = SequenceMatcher(None, title_a.lower(), title_b.lower()).ratio()
+    threshold = config.DEDUP_THRESHOLD if threshold is None else threshold
+    return ratio >= threshold
+
+
+def similar_to_any(title, titles):
+    """Return True if title matches (fuzzily) any title in the iterable."""
+    if not title:
+        return False
+    for other in titles:
+        if other and story_similar(title, other):
+            return True
+    return False
+
+
 def _extract_image(entry):
     """
     Return a usable article image URL, or None.
@@ -167,3 +239,43 @@ def _backfill_image(conn, url, image_url):
         return
     conn.execute("UPDATE articles SET image_url = ? WHERE url = ? AND image_url IS NULL", (image_url, url))
     conn.commit()
+
+
+def select_postable(conn, fresh_rows, posted_titles):
+    """
+    Returns the FIRST fresh article that should be posted, or None.
+    Skips rows that:
+      - are already in the durable post log by URL/exact match, OR
+      - fuzzily match an already-posted story (same story, different magazine), OR
+      - fuzzily match ANOTHER article in this same fresh batch (so we never post
+        two magazines covering one story in a single run).
+    Returns a DB row (dict-like) eligible to post, or None if everything is a dup.
+    """
+    # Exact-URL guard first: never repost a URL already in the log.
+    fresh = []
+    for row in fresh_rows:
+        url = row["url"] if "url" in row.keys() else None
+        if already_posted(url):
+            continue
+        fresh.append(row)
+
+    # Fuzzy guard against already-posted stories (cross-run, cross-source).
+    kept = []
+    for row in fresh:
+        title = row["title"] if "title" in row.keys() else ""
+        if similar_to_any(title, posted_titles):
+            continue
+        kept.append(row)
+
+    # Within-batch guard: collapse duplicate stories appearing in this batch.
+    chosen = None
+    chosen_title = None
+    for row in kept:
+        title = row["title"] if "title" in row.keys() else ""
+        if chosen_title is not None and similar_to_any(title, [chosen_title]):
+            continue
+        chosen = row
+        chosen_title = title
+        break
+
+    return chosen
