@@ -1,0 +1,48 @@
+name: WeekendPulse Deploy
+
+on:
+  schedule:
+    # UK 07:30 / 12:15 / 17:45 / 20:00 / 21:30
+    # NOTE: Cron runs in UTC. Times below assume UK in BST (UTC+1) when scheduled.
+    # When UK moves back to GMT (std time, UTC+0) in late Oct, adjust by removing 1h,
+    # or keep posting window based on testing.
+    - cron: "30 6 * * *"    # 07:30 UK (UTC+1)
+    - cron: "15 11 * * *"   # 12:15 UK
+    - cron: "45 16 * * *"   # 17:45 UK
+    - cron: "0 19 * * *"    # 20:00 UK
+    - cron: "30 20 * * *"   # 21:30 UK
+  workflow_dispatch:        # allow manual trigger for testing
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (so posts_log.csv can be committed)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests feedparser Pillow google-genai
+
+      - name: Run the bot (scrape -> AI -> post -> log)
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DRY_RUN: "0"
+        run: python main.py
+
+      - name: Commit and push posts_log.csv if changed
+        run: |
+          git config user.name "WeekendPulse Bot"
+          git config user.email "bot@weekendpulse.local"
+          git add posts_log.csv
+          git commit -m "chore: update post log [skip ci]" || echo "No changes to log"
+          git push origin HEAD:main || echo "Nothing to push / push failed"

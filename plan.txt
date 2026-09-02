@@ -1,0 +1,145 @@
+=====================================================================
+WEEKENDPULSE - PROJECT PLAN & TODO
+=====================================================================
+Created: 2026-09-02
+Status: BUILD IN PROGRESS
+
+PURPOSE:
+Automated Premier League football Facebook Page that posts 5x/day,
+"debate-first" content. Each post = AI-generated text (Gemini primary,
+Groq fallback) + optional Pillow graphic, posted via Facebook Graph
+API. Hosted free on GitHub Actions.
+
+---------------------------------------------------------------------
+CREDENTIALS (stored ONLY here + GitHub Secrets, NEVER in committed code)
+---------------------------------------------------------------------
+Page ID:   1256418564223752
+Page Token: see secrets.txt (3-month expiry, needs refresh later)
+Github Repo: https://github.com/thechemiluminary/WeekendPulse
+Github Token: see secrets.txt (PAT)
+Gemini API:  see secrets.txt (AQ.ab8... format VERIFIED working w/ gemini-3.6-flash)
+Groq API:    see secrets.txt (VERIFIED working w/ openai/gpt-oss-20b)
+---------------------------------------------------------------------
+SECURITY RULE: secrets.txt contains LIVE SECRETS. .gitignore excludes it.
+Put secrets in GitHub Actions secrets, code reads from env vars only.
+NOTE (2026-09-02): Original file was "Requirements.txt" (collides case-
+insensitively with deps requirements.txt). Renamed credentials to
+secrets.txt to avoid overwrite/commit risk. Deps file is requirements.txt.
+---------------------------------------------------------------------
+
+=====================================================================
+PHASE 0 - PROJECT SETUP
+=====================================================================
+[ x ] Create WeekendPulse folder at C:\Users\hp\Desktop\Claudinho\WeekendPulse
+[ x ] Gather Page ID / Page Token / GitHub repo / GitHub token / Gemini / Groq
+[ x ] Generate Facebook page assets (profile pic + cover, bold WP theme)
+[ x ] Write bio for the Facebook page
+[ x ] Clean up assets/ folder + removed old ugly generation scripts
+[ x ] Add .gitignore (exclude Requirements.txt, *.db, __pycache__, env files)
+[ x ] Create project requirements.txt (requests, feedparser, Pillow, google-generativeai)
+
+=====================================================================
+PHASE 1 - CORE BOT CODE
+=====================================================================
+[ x ] config.py     - constants: page id, RSS feed list, env var names, team colors
+[ x ] db.py         - SQLite schema + helpers (init, mark_posted, get_unposted,
+                      is_posted, last_post_time)
+[ x ] scraper.py    - feedparser: fetch RSS, filter Premier League, dedup by URL
+[ x ] prompts/debate_post.txt - permanent AI prompt template
+[ x ] ai_processor.py - call Gemini; on fail/rate-limit fall back to Groq;
+                      returns formatted FB post text
+[ x ] image_gen.py  - Pillow debate graphics (optional per-post, team colors)
+[ x ] publisher.py  - Facebook Graph API: post text (+ optional image)
+[ x ] main.py       - orchestrator: scrape -> AI -> publish -> mark posted
+[ x ] requirements.txt for the pipeline
+
+  FIXES MADE (2026-09-02):
+  - Google deprecated `google-generativeai`; migrated to new `google.genai` SDK
+  - Gemini model `gemini-2.5-flash` retired for new users -> `gemini-3.6-flash`
+  - Groq `llama-3.3-70b-versatile` retired 2026-08-16 -> `openai/gpt-oss-20b`
+  - Groq GPT-OSS models are reasoners; raised max_tokens to 1200 so reasoning
+    finishes before content is emitted (low budget returned empty content)
+  - ai_processor now validates non-empty Groq content + falls back on empty
+  - VERIFIED: Gemini AND Groq both produce on-template debate posts; fallback
+    chain proven (Gemini 503 -> Groq wrote post + image)
+
+=====================================================================
+PHASE 2 - LOCAL TEST
+=====================================================================
+[ x ] Install deps in a venv
+[ x ] Run main.py once with real keys behind a DRY_RUN/test flag
+[ x ] Confirm AI returns good post format
+[ x ] Post ONE real test post to the page, verify it appears (POSTED, text+image verified)
+[ x ] Confirm DB records the post (no double-post on re-run)
+
+  PHASE 2 RESULT (2026-09-02): ALL VERIFIED LIVE
+  - Post #1 (id ...7275475216): text-only via main.py; gemini provider; on page.
+    Image step failed transiently that run -> graceful text-only fallback worked.
+  - Post #2 (id ...3584352156): text + generic WEEKENDPULSE Pillow CARD attached.
+    USER CORRECTION: card is WRONG style for a football page.
+  - DB marks article 103 as posted (posted=1, stores fb post_id).
+
+  IMAGE STRATEGY CHANGED (2026-09-02, per user):
+  - DROP the fake text-on-color Pillow card as default.
+  - Use the ARTICLE'S REAL PHOTO from the feed (BBC media_thumbnail upscaled to
+    1024px, Guardian/Sky image extraction) as the post image.
+  - Text-only fallback when no feed image exists (no fake graphic).
+  - Added image_url column to DB (full_text migration); backfill re-scrape fills
+    existing rows -> 78/102 unposted now have real images.
+  - publisher.post_text_with_image_url() downloads + uploads the real photo.
+  - image_gen.py RETAINED as an OPT-IN tool only (not used by default).
+  - ADDED FourFourTwo feed (https://www.fourfourtwo.com/feeds/all) - major UK
+    magazine; 50 items; real images via media_thumbnail/media_content (Future CDN).
+    Pool now ~146 total articles, ~122 with images, ~144 unposted.
+  - POST LENGTH: user says posts are a bit LONG for FB. Keep as-is for now as an
+    experiment; SHORTEN later only if engagement doesn't improve. (Decision locked
+    for now, revisit in Phase 4.)
+  - FUTURE-ONLY RULE (user requirement, pre-deployment): bot NEVER reuses old
+    backlog. main.py only posts articles scraped DURING the current run.
+    scrape_all() returns freshly-inserted rows only; verified: with a 146-article
+    backlog, a re-scrape returned 1 new article and skipped all old ones.
+  - POST LOG (user requirement): post_log.py appends every publish to posts_log.csv
+    (posted_at_utc, post_id, article_id, title, url, source, pub_image). This file
+    is committed to the repo each run to keep a durable history.
+
+=====================================================================
+PHASE 3 - GITHUB ACTIONS DEPLOYMENT
+=====================================================================
+[   ] Create .github/workflows/post.yml (5 cron runs/day, UK/UTC times)
+[   ] git init + first commit (code only, NO secrets)
+[   ] Push to thechemiluminary/WeekendPulse
+[   ] Add Actions secrets: FB_PAGE_TOKEN, FB_PAGE_ID, GEMINI_API_KEY,
+      GROQ_API_KEY
+[   ] Trigger workflow_dispatch manually -> verify a post fires
+[   ] Confirm scheduled runs fire at correct times (check Actions log)
+
+=====================================================================
+PHASE 4 - MONITORING & REFINEMENT
+=====================================================================
+[   ] Week 1: check engagement (likes/comments/shares) on posts
+[   ] Identify which post types perform best
+[   ] Tune AI prompt (prompts/debate_post.txt) based on results
+[   ] Verify API key usage is within daily limits (no exhaustion)
+[   ] Consider securing a NON-EXPIRING page token (3-month one expires)
+
+=====================================================================
+PHASE 5 - GROWTH & MONETIZATION
+=====================================================================
+[   ] Post consistently 5x/day for 4-6 months
+[   ] Hit 10K followers + 150K views in 28 days
+[   ] Express interest in Facebook Content Monetization (Professional
+      Dashboard -> Monetization tab)
+[   ] Get invited -> start earning
+[   ] Reassess: double down on what works, consider IG/TikTok cross-post
+
+=====================================================================
+ONGOING / OPEN DECISIONS (no blocker, revisit as needed)
+=====================================================================
+[   ] Schedule times: default UK 07:30 / 12:15 / 17:45 / 20:00 / 21:30
+[   ] Image on every post vs text-only first (start text-only, add images)
+[   ] Verify Gemini key format (DONE - AQ.ab8... works with gemini-3.6-flash)
+[   ] Verify Groq key works (DONE - works with openai/gpt-oss-20b)
+[   ] Confirm Meta app for token generation (said: new page + existing app)
+=====================================================================
+END OF PLAN
+=====================================================================

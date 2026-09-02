@@ -1,0 +1,18 @@
+# Security: NEVER commit live secrets
+secrets.txt
+
+# Local data / state
+data/*.db
+data/images/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+
+# OS
+Thumbs.db
+.DS_Store
