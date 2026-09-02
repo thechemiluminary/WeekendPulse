@@ -47,6 +47,17 @@ DRY_RUN = os.environ.get("DRY_RUN", "0") == "1"
 # Raise to dedup harder (fewer posts), lower to allow more distinct posts.
 DEDUP_THRESHOLD = float(os.environ.get("DEDUP_THRESHOLD", "0.3"))
 
+# --- Reels (short per-article video summary) ---
+REEL_EMOTIONS = ["neutral", "excited", "surprised"]
+REEL_BLURB_MAX_WORDS = 55          # keeps each narration ~12s for retention
+REEL_MAX_PER_RUN = 6               # cap on reels rendered in one nightly batch
+REEL_TARGET_SECONDS = 16           # soft target (not enforced)
+REEL_SOFT_MAX_SECONDS = 25         # soft ceiling: only a warning, never blocks/trims
+ROWS_REEL_TODAY_UTC_HOUR = 0       # not used; reel cutoff is "posted today (UK)"
+REEL_ACCENT_COLOR = "#FF6B00"      # vibrant orange
+REEL_WHITE = "#FFFFFF"
+REEL_DAYS_BACK = 1                 # only today's posted stories are reel-eligible
+
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "weekendpulse.db")

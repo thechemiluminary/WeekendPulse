@@ -10,7 +10,7 @@ import json
 import config
 from db import init_db, get_conn, mark_posted as _mark_posted
 from scraper import scrape_all, select_postable
-from ai_processor import turn_article_into_post
+from ai_processor import turn_article_into_post_json
 from publisher import post_text, post_text_with_image_url
 from post_log import append_post, posted_titles
 
@@ -50,7 +50,14 @@ def run(include_image=True):
         print("[main] DRY_RUN - skipping AI + publish")
         return {"status": "dry_run", "article": title}
 
-    post, provider = turn_article_into_post(title, summary)
+    post_result = turn_article_into_post_json(title, summary)
+    post = post_result["post_text"]
+    provider = post_result["provider"]
+    reel_meta = {
+        "reel_worthy": post_result["reel_worthy"],
+        "reel_emotion": post_result["reel_emotion"],
+        "reel_blurb": post_result["reel_blurb"],
+    }
     print(f"[main] AI generated ({provider})")
 
     # 4. Publish with the article's REAL image when available, else text-only.
@@ -63,7 +70,7 @@ def run(include_image=True):
 
     if ok:
         _mark_posted(conn, article["id"], result)
-        log_path = append_post(result, article, image_used=(attach == "image"))
+        log_path = append_post(result, article, image_used=(attach == "image"), reel_meta=reel_meta)
         print(f"[main] posted OK ({attach}): {result}")
         print(f"[main] logged to {log_path}")
         return {

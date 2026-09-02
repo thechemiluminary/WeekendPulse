@@ -10,7 +10,10 @@ from datetime import datetime, timezone
 from config import BASE_DIR
 
 LOG_PATH = os.path.join(BASE_DIR, "posts_log.csv")
-_COLUMNS = ["posted_at_utc", "post_id", "article_id", "title", "url", "source", "pub_image"]
+_COLUMNS = [
+    "posted_at_utc", "post_id", "article_id", "title", "url", "source", "pub_image",
+    "image_url", "reel_worthy", "reel_emotion", "reel_blurb",
+]
 
 _HEADER = _COLUMNS
 
@@ -21,12 +24,15 @@ def _ensure_file():
             csv.writer(f).writerow(_HEADER)
 
 
-def append_post(post_id, article_row, image_used):
+def append_post(post_id, article_row, image_used, reel_meta=None):
     """
     Append a row for a published post. Returns the path written.
     article_row: a DB row (dict-like) with id/url/title/source/image_url.
+    reel_meta: optional dict {reel_worthy, reel_emotion, reel_blurb}.
     """
     _ensure_file()
+    reel_meta = reel_meta or {}
+    worthy = bool(reel_meta.get("reel_worthy"))
     row = {
         "posted_at_utc": datetime.now(timezone.utc).isoformat(),
         "post_id": post_id or "",
@@ -35,6 +41,10 @@ def append_post(post_id, article_row, image_used):
         "url": (article_row["url"] if "url" in article_row.keys() else "") or "",
         "source": (article_row["source"] if "source" in article_row.keys() else "") or "",
         "pub_image": "yes" if image_used else "no",
+        "image_url": (article_row["image_url"] if "image_url" in article_row.keys() else "") or "",
+        "reel_worthy": "yes" if worthy else "no",
+        "reel_emotion": reel_meta.get("reel_emotion", "neutral") if worthy else "neutral",
+        "reel_blurb": reel_meta.get("reel_blurb", "") if worthy else "",
     }
     with open(LOG_PATH, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=_COLUMNS)

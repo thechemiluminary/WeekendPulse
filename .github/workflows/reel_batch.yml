@@ -1,0 +1,31 @@
+name: WeekendPulse Reel Batch
+
+# Builds reels_batch.txt from today's reel-worthy posts. Manual-trigger only
+# (you render reels whenever convenient; no fixed nightly schedule).
+on:
+  workflow_dispatch:
+
+jobs:
+  batch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (so posts_log.csv + reels_batch.txt are present)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build reel batch
+        run: python reel_batch.py
+
+      - name: Commit and push reels_batch.txt if changed
+        run: |
+          git config user.name "WeekendPulse Bot"
+          git config user.email "bot@weekendpulse.local"
+          git add reels_batch.txt
+          git commit -m "chore: update reel batch [skip ci]" || echo "No changes to reel batch"
+          git push origin HEAD:main || echo "Nothing to push / push failed"

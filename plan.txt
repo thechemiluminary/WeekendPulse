@@ -137,6 +137,63 @@ PHASE 3 - GITHUB ACTIONS DEPLOYMENT
   07:00-22:00 UK; shift cron to "0 8-23 * * *" then. Review in late Oct.
 
 =====================================================================
+PHASE 3b - REELS WORKSTREAM (auto short-video per AI-approved story)
+=====================================================================
+Goal: one short (~16s, 9:16) Facebook Reel per reel-worthy article, rendered
+on demand in a free Colab notebook (NOT auto-pushed to FB).
+
+DECISIONS (all locked):
+- Per-article reels, N input -> N output MP4s (no summary reel).
+- Nightly batch render in Colab; no fixed schedule; post whenever convenient.
+- No intro; fixed 4s outro (user's outro.mp4) with ~0.4s crossfade-in + audio
+  crossfade; soft length warning only (no hard cap; ~16s target, <25s ideal).
+- TTS speaks short reel_blurb (~12s, <=55 words); full post stays as caption.
+- Voice: exactly 10 generated female voices; random identity per reel; emotion
+  best-effort from AI reel_emotion (missing clip -> neutral base); never pinned.
+  SOURCE: public OwenTyme/voice-zero voices-emotion/ pool (each voice is a
+  folder of emotion .flac). Pool = 10 female voices; renderer picks a random
+  voice folder + the emotion's clip (excited/surprised), else neutral.flac.
+  NOTE (per user 2026-09-02): confirmed the 4 names I'd guessed absent; replaced
+  with amy_koenig/alana_jordan/emily_anderson/anna_simon (all exist).
+- Emotions: neutral / excited / surprised (AI decision); missing/invalid -> neutral.
+- AI gates reel-worthiness in the SAME reformat call: JSON
+  {post_text, reel_worthy, reel_emotion, reel_blurb}; no human gate.
+- Music: user drops loopable .mp3/.wav into WeekendPulse music/; mixer starts
+  track at pos 0 and cuts at narration end (NO tail-cut), auto-ducked.
+- Palette: vibrant orange (#FF6B00) + white.
+- In-Colab preview: one reel at a time, Next/Previous (embedded HTML video).
+- No auto-push to Facebook; no fixed posting time.
+- reels_batch.yml is workflow_dispatch-only (no cron).
+- REEL_MAX_PER_RUN=6 cap.
+
+CODE DONE (2026-09-02):
+[ x ] prompts/debate_post.txt -> JSON contract (reel_worthy/emotion/blurb)
+[ x ] ai_processor.py turn_article_into_post_json + _parse_json_result (fallback-safe)
+[ x ] main.py uses JSON version + passes reel_meta to append_post
+[ x ] post_log.py -> columns now include image_url + reel fields
+[ x ] config.py -> REEL_* constants (emotions, palette, soft max, blurb words, max/run, days back)
+[ x ] reel_batch.py -> builds reels_batch.txt {generated_at_utc,count,reels[]}
+[ x ] .github/workflows/reel_batch.yml (dispatch-only, commits reels_batch.txt)
+[ x ] music/ + outro/ folders (user drops assets; .gitkeep + README)
+[ x ] builder_reel/ full source tree:
+      - 01_intro.md 02_install.py 03_assets.py 04_render.py 05_preview.py 06_download.py
+      - story_src/reel_render.py (Ken Burns + Chatterbox-Nano TTS + random female voice
+        + precise emotion + enhance_audio + align captions + head-cut music + title card
+        + crossfade into outro/outro.mp4)
+      - story_src/align.py + enhance.py (reused from ScaryTales, no secret dumps)
+      - reel_assemble.py (builds news_reel.ipynb; base64-embeds story_src)
+      - reel_validate.py (NOT needed to import torch/flask)
+[ x ] news_reel.ipynb built (7 cells: intro, install, write-src, assets, render, preview, download)
+[ x ] reel_batch.collect_batch unit-verified (today-only, sanitize emotion, cap blurb, newest first)
+[ x ] reel_validate ALL PASS; notebook decodes + modules parse OK
+
+NEXT:
+[   ] (user to provide) outro/outro.mp4 + loopable music files into music/
+[   ] Open news_reel.ipynb in Colab (T4 GPU), run cells, sanity-render 1 reel
+[   ] Commit + push this reel Phase to GitHub (A1-A7 + music/ + outro/ + builder_reel/)
+[   ] Wire reel Emotion variants (10 voices x excited/surprised exported clips) if desired
+
+=====================================================================
 PHASE 4 - MONITORING & REFINEMENT
 =====================================================================
 [   ] Week 1: check engagement (likes/comments/shares) on posts
