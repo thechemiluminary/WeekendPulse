@@ -237,6 +237,22 @@ NEXT:
 [   ] Commit + push Phase 3c (+ pending manifest/reels Phase) to main
 [   ] Manual workflow_dispatch on match_preview.yml to verify scheduling fires
 
+PHASE 3c RESULTS (2026-09-03) - LIVE TEST PASSED:
+- Token verified live: football-data.org PL fetch works (HTTP 200).
+- Today (2026-09-03) has 0 fixtures -> --match-preview returns
+  {"status":"no_fixtures_today"} gracefully (correct, no crash).
+- End-to-end on TOMORROW's real match (Ipswich Town vs Liverpool FC, matchday 3,
+  kickoff 19:00 UTC): fixture fetch -> VS card (real crests, 153KB) -> Gemini
+  comment-bait post -> schedule_post OK, post_id 122093713179475216.
+- Scheduled to publish 14:00 UTC Sat = exactly 5h before the 19:00 kickoff.
+- FIX APPLIED: schedule_post initially used /feed, which errored
+  "(#100) source should represent a valid URL" because /feed wants source as a
+  URL, not a file upload. SWITCHED to /photos (accepts real file bytes) with
+  published=false + scheduled_publish_time. VERIFIED WORKING.
+- Manifest records the schedule (match_key ips-vs-liv-2026-09-04, fixture_id
+  560566, scheduled_publish_time 1788530400, status "scheduled"); dedup active.
+- Committed + pushed as f0f932d.
+
 [   ] Week 1: check engagement (likes/comments/shares) on posts
 [   ] Identify which post types perform best
 [   ] Tune AI prompt (prompts/debate_post.txt) based on results
