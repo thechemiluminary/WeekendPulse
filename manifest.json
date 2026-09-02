@@ -74,5 +74,31 @@
     "reel_emotion_used": "",
     "reel_music": "",
     "reel_rendered_at": ""
+  },
+  {
+    "slug": "ips-vs-liv-2026-09-04",
+    "posted_at_utc": "2026-09-02T23:35:12.915804+00:00",
+    "post_id": "122093713179475216",
+    "title": "Ipswich Town FC vs Liverpool FC",
+    "description": "match-preview",
+    "url": "",
+    "image_url": "",
+    "reel_approved": false,
+    "reel_emotion": "neutral",
+    "reel_blurb": "",
+    "rendered": false,
+    "reel_posted": false,
+    "reel_video_id": "",
+    "reel_voice": "",
+    "reel_emotion_used": "",
+    "reel_music": "",
+    "reel_rendered_at": "",
+    "match_key": "ips-vs-liv-2026-09-04",
+    "fixture_id": 560566,
+    "scheduled_publish_time": "1788530400",
+    "match_home": "Ipswich Town FC",
+    "match_away": "Liverpool FC",
+    "match_kickoff": "2026-09-04T19:00:00Z",
+    "status": "scheduled"
   }
 ]

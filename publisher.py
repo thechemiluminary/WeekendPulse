@@ -90,16 +90,18 @@ def post_text_with_image(message, image_path):
 def schedule_post(message, image_path, scheduled_unix):
     """
     Schedule a photo + caption to go LIVE at scheduled_unix (Unix seconds).
-    Uses the /feed endpoint with published=false + scheduled_publish_time.
-    BOTH fields MUST be sent together - if published defaults to true the
-    schedule is silently ignored and the post goes live immediately.
+    Uses the /photos endpoint with published=false + scheduled_publish_time so
+    the `source` is a real file upload (the /feed endpoint only accepts `source`
+    as a URL, so it can't upload a local image). BOTH published=false and
+    scheduled_publish_time must be sent together - if published defaults to true
+    the post goes live immediately instead of on schedule.
 
     Publish window is 10 minutes .. 30 days from the request. Returns
     (ok, post_id_or_error).
     """
     with open(image_path, "rb") as f:
         content = f.read()
-    url = f"{GRAPH}/{FB_PAGE_ID}/feed"
+    url = f"{GRAPH}/{FB_PAGE_ID}/photos"
     files = {"source": content}
     data = {
         "message": message,
