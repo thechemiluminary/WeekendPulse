@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T19:30:21.843203+00:00",
+  "last_collect_utc": "2026-09-03T21:40:19.250887+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -104,6 +104,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T19:30:21.843196+00:00",
       "hash": "1047798"
+    },
+    {
+      "text": "🚨 ❌ OFFICIAL: Federico Chiesa and Wataru Endo have been left out of Liverpool Champions League squad. https://t.co/rmBAjNDvra — Fabrizio Romano ( @FabrizioRomano ) Sep 3, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-03T21:40:19.250875+00:00",
+      "hash": "6290206"
     }
   ],
   "posted": [],
@@ -134,7 +140,8 @@
     "4048122",
     "7846572",
     "6837515",
-    "1047798"
+    "1047798",
+    "6290206"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
