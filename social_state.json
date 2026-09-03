@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T22:55:18.522629+00:00",
+  "last_collect_utc": "2026-09-03T23:15:18.539458+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -116,6 +116,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T22:55:18.522620+00:00",
       "hash": "9724862"
+    },
+    {
+      "text": "Élisa De Almeida signs for Arsenal | Arsenal FC Official Website | https://www.reddit.com/r/soccer/comments/1w6nfn4/élisa_de_almeida_signs_for_arsenal_arsenal_fc/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T23:15:18.539448+00:00",
+      "hash": "883800"
     }
   ],
   "posted": [],
@@ -148,7 +154,8 @@
     "6837515",
     "1047798",
     "6290206",
-    "9724862"
+    "9724862",
+    "883800"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
