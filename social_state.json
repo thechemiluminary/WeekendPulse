@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T21:40:19.250887+00:00",
+  "last_collect_utc": "2026-09-03T22:55:18.522629+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -110,6 +110,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-03T21:40:19.250875+00:00",
       "hash": "6290206"
+    },
+    {
+      "text": "Suso (32) retires from the beautiful game. He stays with Cádiz in a role off the pitch. The Spaniard also played for Liverpool, Almería, Milan, Genoa, Sevilla. | https://www.reddit.com/r/soccer/comments/1w6my7a/suso_32_retires_from_the_beautiful_game_he_stays/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T22:55:18.522620+00:00",
+      "hash": "9724862"
     }
   ],
   "posted": [],
@@ -141,7 +147,8 @@
     "7846572",
     "6837515",
     "1047798",
-    "6290206"
+    "6290206",
+    "9724862"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
