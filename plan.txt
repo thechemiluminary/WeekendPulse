@@ -310,6 +310,52 @@ PHASE 3c-2 LIVE RESCHEDULE + FIX (2026-09-03):
 - Manifest match_key dedup verified working after reschedule (already_posted_fixture=True).
 
 =====================================================================
+PHASE 3d - SOCIAL ENGAGEMENT ENGINE (AI-generated engagement posts)
+=====================================================================
+Goal: a self-directed engine producing viral/engagement-bait PL Facebook posts
+in ANY format (full AI creative freedom), published at fixed UK times, each with
+a REAL web image fetched by Gemini via Google Search Grounding (NOT AI-generated).
+
+KEY DECISIONS (all locked 2026-09-03, per user):
+- 6 posts/day at UK times: 11:30, 14:00, 15:00, 16:00, 19:00, 20:00
+  (SOCIAL_MAX_PER_DAY=6, SOCIAL_POST_SLOTS in config).
+- FULL creative freedom: no fixed format set; AI picks best-engagement angle
+  (best XI, transfer, career story, countdown, comparison, poll, post-match...).
+- Unicode styled text via *asterisk* markup (social_style.py -> 𝗕𝗢𝗟𝗗 sans).
+- Images: real web images via Gemini Search Grounding in same request
+  (chunks[].image.image_uri / imageUri). Separate key GEMINI_KEY_SOCIAL.
+- Provider chain: GEMINI_KEY_SOCIAL -> GEMINI_API_KEY -> GROQ (text-only).
+- Inspiration pool (5-min collector, NO Gemini): football-data fixtures +
+  Telegram channels (direct t.me/s/<ch> web preview, token-free + reliable)
+  + Reddit r/soccer RSS. Used ONLY as inspiration; AI rewrites originally.
+  NOTE: RSSHub public instance 403s Telegram -> replaced with direct t.me HTML.
+
+CODE DONE (2026-09-03):
+[ x ] social_style.py - Unicode bold/sans converter (*x* -> styled)
+[ x ] prompts/social_post.txt - engagement-first prompt, self-scoring JSON
+[ x ] social_ai.py - generate_candidates() (grounded), select_best() (score +
+      repetition/variety guards), find_image_url() (grounded image fetch)
+[ x ] social_state.py - social_state.json store (pool, posted log, daily cap,
+      engagement feedback, slot double-fire guard)
+[ x ] social_collect.py - collect_all(): fixtures + Telegram + Reddit -> pool
+[ x ] config.py - SOCIAL_* constants (slots, window, cap, embed model, sources)
+[ x ] main.py - run_collect()/run_social() + `--collect`/`--social` flags
+[ x ] .github/workflows/collect.yml - 5-min engine (collect + social + commit state)
+[ x ] Local tests PASSED: pool ingestion (Telegram 20 + Reddit 25), generation
+      (Groq fallback -> 4-5 scored candidates), selection, style, slot gate,
+      cap guard, double-fire guard, DRY_RUN path.
+  NOTE: main Gemini key hit quota (429) locally -> engine fell back to Groq.
+  Real grounded-image path needs the separate GEMINI_KEY_SOCIAL (2nd account).
+
+NEXT:
+[   ] USER: create a 2nd Google/Gemini account, add its key as GitHub secret
+      GEMINI_KEY_SOCIAL (provider chain already falls back if unset)
+[   ] USER: add a cron-job.org entry firing collect.yml every 5 min
+      (existing cron-job drives post.yml hourly; new one drives collect.yml)
+[   ] Commit + push Phase 3d (workflows, social_* modules, social_state.json)
+[   ] Live workflow_dispatch test: verify a generated post + grounded image
+
+=====================================================================
 PHASE 4 - MONITORING & REFINEMENT
 =====================================================================
 [   ] Week 1: check engagement (likes/comments/shares) on posts

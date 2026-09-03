@@ -1,0 +1,50 @@
+name: WeekendPulse Social Engine
+
+# Fired every ~5 minutes by cron-job.org. The 5-min cadence lands exactly on
+# each XX:00 and XX:30 UK slot, so the social step fires the generated
+# engagement posts at 11:30, 14:00, 15:00, 16:00, 19:00 and 20:00 UK.
+# The collect step (heavy lifting, NO Gemini) keeps the talking-point pool fresh.
+on:
+  workflow_dispatch:
+
+jobs:
+  social:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (so social_state.json can be committed)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests feedparser google-genai
+
+      - name: Run social collector (ingest talking points - no Gemini)
+        env:
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
+        run: python -u main.py --collect
+
+      - name: Run social engine (generate + publish engagement posts at UK slots)
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GEMINI_KEY_SOCIAL: ${{ secrets.GEMINI_KEY_SOCIAL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
+          SOCIAL_ENABLED: "1"
+          DRY_RUN: "0"
+        run: python -u main.py --social
+
+      - name: Commit and push social_state.json if changed
+        run: |
+          git config user.name "WeekendPulse Bot"
+          git config user.email "bot@weekendpulse.local"
+          git add social_state.json
+          git commit -m "chore: update social state [skip ci]" || echo "No changes to social state"
+          git push origin HEAD:main || echo "Nothing to push / push failed"

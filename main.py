@@ -17,7 +17,7 @@ import time
 import config
 from db import init_db, get_conn, mark_posted as _mark_posted
 from ai_processor import turn_article_into_post_json, turn_fixture_into_post
-from publisher import post_text, post_text_with_image_url, schedule_post
+from publisher import post_text, post_text_with_image_url, schedule_post, sanitize_text
 import manifest
 from manifest import append_post_entry, posted_titles
 import fixtures as fixtures_mod
@@ -194,9 +194,147 @@ def run_match_preview():
     return {"status": "done", "scheduled": scheduled, "skipped": skipped}
 
 
+def _uk_now():
+    """Return (hour, minute) of the current time in the UK (Europe/London)."""
+    try:
+        from zoneinfo import ZoneInfo
+        uk = datetime.datetime.now(ZoneInfo("Europe/London"))
+    except Exception:
+        # Fallback: no tzdata. Use local naive time (assume UK-dev box) but note it.
+        uk = datetime.datetime.now()
+    return uk.hour, uk.minute
+
+
+def _active_social_slot():
+    """
+    Return the (hour, minute) slot we should fire for right now, or None.
+    Fires if the current UK time is within SOCIAL_FIRE_WINDOW_MIN after one of
+    the configured slots. Returns the slot tuple on match.
+    """
+    h, m = _uk_now()
+    slot_minutes = {h * 60 + mm for (h, mm) in config.SOCIAL_POST_SLOTS}
+    now_minutes = h * 60 + m
+    for (sh, sm) in config.SOCIAL_POST_SLOTS:
+        slot_start = sh * 60 + sm
+        if slot_start <= now_minutes <= slot_start + config.SOCIAL_FIRE_WINDOW_MIN:
+            return (sh, sm)
+    return None
+
+
+def run_collect():
+    """5-min collector: ingest football talking points into social_state.json (NO Gemini)."""
+    from social_collect import collect_all
+    try:
+        summary = collect_all()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "error": str(e)}
+    return {"status": "done", **summary}
+
+
+def run_social():
+    """
+    Generated social post engine. Fires only at the configured UK slots, posts
+    at most SOCIAL_MAX_PER_DAY times per day. For each firing:
+      1. Gate on UK slot + daily cap.
+      2. Generate N self-scored candidates (Gemini, grounded).
+      3. Pick the best above threshold.
+      4. Fetch a real web image via grounding (same request, else image search).
+      5. Apply Unicode style markup and publish (image if available, else text).
+    Returns a result dict.
+    """
+    import social_ai
+    import social_state
+
+    if not config.SOCIAL_ENABLED:
+        return {"status": "disabled"}
+
+    slot = _active_social_slot()
+    if slot is None:
+        return {"status": "off_slot", "uk": _uk_now()}
+
+    if social_state.posted_today() >= config.SOCIAL_MAX_PER_DAY:
+        return {"status": "cap_reached",
+                "posted_today": social_state.posted_today()}
+
+    # Avoid double-firing the same slot (persistent guard keyed by slot).
+    today_key = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    slot_key = f"{slot[0]:02d}:{slot[1]:02d}"
+    last = social_state.last_fired_slot()
+    if last and last[0] == today_key and last[1] == slot_key:
+        return {"status": "slot_already_fired", "slot": slot}
+
+    print(f"[social] firing for UK slot {slot[0]:02d}:{slot[1]:02d} "
+          f"({social_state.posted_today()}/{config.SOCIAL_MAX_PER_DAY} today)")
+
+    if config.DRY_RUN:
+        print("[social] DRY_RUN - generating candidates only, no publish")
+        candidates, provider, chunks = social_ai.generate_candidates()
+        return {"status": "dry_run", "provider": provider,
+                "candidates": len(candidates)}
+
+    # 1. Generate candidates (grounded -> also pulls real image chunks).
+    candidates, provider, chunks = social_ai.generate_candidates()
+    if not candidates:
+        return {"status": "no_candidates", "provider": provider}
+
+    # 2. Select best above threshold.
+    best, reasons = social_ai.select_best(candidates)
+    if best is None:
+        return {"status": "no_above_threshold",
+                "scores": [c.get("predicted_engagement") for c in candidates]}
+
+    post_text = social_ai.apply_style(best.get("post_text", ""))
+    if not post_text:
+        return {"status": "empty_post"}
+
+    # 3. Real web image via grounding.
+    image_url = ""
+    if config.SOCIAL_GROUNDED:
+        try:
+            image_url = social_ai.find_image_url(chunks, best.get("image_query", ""))
+        except Exception as e:
+            print(f"[social] image fetch failed (will post text-only): {e}")
+            image_url = ""
+
+    # 4. Publish.
+    ok, result = False, ""
+    attach = "text"
+    if image_url:
+        ok, result = post_text_with_image_url(post_text, image_url)
+        attach = "image" if ok else "text(no_image)"
+    if not ok:
+        ok, result = post_text(post_text)
+        attach = "text"
+    if not ok:
+        print(f"[social] PUBLISH FAILED: {result}")
+        return {"status": "publish_error", "error": str(result)}
+
+    # 5. Record.
+    social_state.record_posted(best.get("format", ""), best.get("topic", ""),
+                               post_text, post_id=result, image_url=image_url)
+    social_state.set_fired_slot(slot_key)
+
+    print(f"[social] POSTED ({attach}, score={best.get('predicted_engagement')}): {result}")
+    return {"status": "posted", "post_id": result, "attach": attach,
+            "provider": provider, "score": best.get("predicted_engagement"),
+            "format": best.get("format")}
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--match-preview":
         result = run_match_preview()
+        print(json.dumps(result, default=str))
+        sys.exit(0)
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--collect":
+        result = run_collect()
+        print(json.dumps(result, default=str))
+        sys.exit(0)
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--social":
+        result = run_social()
         print(json.dumps(result, default=str))
         sys.exit(0)
 

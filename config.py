@@ -13,6 +13,9 @@ FB_PAGE_TOKEN = os.environ.get("FB_PAGE_TOKEN", "")
 # --- AI providers ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+# Dedicated key for the social engagement engine (user's 2nd account). Falls
+# back to GEMINI_API_KEY then GROQ_API_KEY.
+GEMINI_KEY_SOCIAL = os.environ.get("GEMINI_KEY_SOCIAL", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "models/gemini-3.6-flash")
 
@@ -86,6 +89,29 @@ PROMPT_PATH = os.path.join(BASE_DIR, "prompts", "debate_post.txt")
 MATCH_PROMPT_PATH = os.path.join(BASE_DIR, "prompts", "match_post.txt")
 FONT_DIR = os.path.join(BASE_DIR, "data", "fonts")
 IMAGE_DIR = os.path.join(BASE_DIR, "data", "images")
+
+# --- Social engagement engine ---
+SOCIAL_ENABLED = os.environ.get("SOCIAL_ENABLED", "1") == "1"
+SOCIAL_MAX_PER_DAY = int(os.environ.get("SOCIAL_MAX_PER_DAY", "6"))
+# Explicit UK (Europe/London) fire slots: (hour, minute). 6 posts/day.
+SOCIAL_POST_SLOTS = [(11, 30), (14, 0), (15, 0), (16, 0), (19, 0), (20, 0)]
+# How many minutes after a slot the engine is still allowed to fire (the 5-min
+# collector means the actual run can land a few minutes late).
+SOCIAL_FIRE_WINDOW_MIN = int(os.environ.get("SOCIAL_FIRE_WINDOW_MIN", "10"))
+SOCIAL_GROUNDED = os.environ.get("SOCIAL_GROUNDED", "1") == "1"
+SOCIAL_NUM_CANDIDATES = int(os.environ.get("SOCIAL_NUM_CANDIDATES", "4"))
+SOCIAL_EMBED_MODEL = os.environ.get("SOCIAL_EMBED_MODEL", GEMINI_MODEL)
+# Sources ingested by the 5-min collector (free, stable, token-less).
+SOCIAL_TELEGRAM_CHANNELS = os.environ.get(
+    "SOCIAL_TELEGRAM_CHANNELS",
+    "FabrizioRomanoTG",
+).split(",")
+SOCIAL_REDDIT_SUBS = os.environ.get("SOCIAL_REDDIT_SUBS", "soccer").split(",")
+# Trusted image domains for the grounding image_url (avoids junk attachments).
+SOCIAL_IMAGE_ALLOW = [
+    "cdn.", "images.", "media.", "static.", "img.", "assets.", "ichef.",
+    "upload.", "thumbnails.", "ts1.", "ts2.",
+]
 
 # --- Team accent colors (for image_gen) ---
 TEAM_COLORS = {
