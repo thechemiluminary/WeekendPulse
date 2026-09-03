@@ -39,7 +39,7 @@ PL_KEYWORDS = [
 ]
 
 # --- Posting ---
-MAX_POSTS_PER_RUN = 1          # one post per scheduled run (5 runs/day)
+MAX_POSTS_PER_RUN = 3          # up to 3 posts per run (compensates for missed cron runs)
 DRY_RUN = os.environ.get("DRY_RUN", "0") == "1"
 
 # --- Cross-source story dedup ---

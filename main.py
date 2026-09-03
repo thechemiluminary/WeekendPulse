@@ -1,7 +1,7 @@
 """
 WeekendPulse - Orchestrator.
-Flow: init db -> scrape feeds -> publish ONE freshly-scraped (FUTURE) article only
-      -> AI post -> publish to Facebook (real article photo, else text)
+Flow: init db -> scrape feeds -> publish up to MAX_POSTS_PER_RUN freshly-scraped
+      articles -> AI post -> publish to Facebook (real article photo, else text)
       -> mark posted -> append to manifest.
 Only articles scraped during THIS run are eligible; old backlog is never reused.
 
@@ -23,41 +23,15 @@ from manifest import append_post_entry, posted_titles
 import fixtures as fixtures_mod
 
 
-def run(include_image=True):
-    from scraper import scrape_all, select_postable
-
-    init_db()
-    conn = get_conn()
-
-    # 1. Scrape new articles. Only freshly-scraped rows are returned -
-    #    the bot NEVER touches older backlog (future-only rule).
-    try:
-        new, fresh = scrape_all(conn)
-    except Exception as e:
-        print(f"[main] scrape error: {e}")
-        return {"status": "scrape_error", "error": str(e)}
-    print(f"[main] scraped, new articles: {new}")
-
-    if not fresh:
-        print("[main] no freshly-scraped articles - nothing to do.")
-        return {"status": "no_content"}
-
-    # 2. Pick the first fresh article that is NOT a duplicate of an already-posted
-    #    story (or of another magazine in this same batch). Everything duplicating
-    #    an earlier post is skipped; if all are dups, post nothing.
-    article = select_postable(conn, fresh, posted_titles())
-    if article is None:
-        print("[main] all fresh articles duplicate already-posted stories - nothing to do.")
-        return {"status": "no_content"}
-
+def _publish_one(article, conn, include_image=True):
+    """Generate AI post + publish one article. Returns a result dict."""
     title = article["title"]
     summary = article["summary"] or ""
-    image_url = article["image_url"] if article.keys() and "image_url" in article.keys() else None
-    print(f"[main] picked fresh article: {title}")
+    image_url = article.get("image_url")
+    print(f"[main]   article: {title[:80]}")
 
-    # 3. AI generate the post.
     if config.DRY_RUN:
-        print("[main] DRY_RUN - skipping AI + publish")
+        print("[main]   DRY_RUN - skipping AI + publish")
         return {"status": "dry_run", "article": title}
 
     post_result = turn_article_into_post_json(title, summary)
@@ -68,9 +42,8 @@ def run(include_image=True):
         "reel_emotion": post_result["reel_emotion"],
         "reel_blurb": post_result["reel_blurb"],
     }
-    print(f"[main] AI generated ({provider})")
+    print(f"[main]   AI ({provider}): {post[:80]}...")
 
-    # 4. Publish with the article's REAL image when available, else text-only.
     if include_image and image_url:
         ok, result = post_text_with_image_url(post, image_url)
         attach = "image"
@@ -81,18 +54,72 @@ def run(include_image=True):
     if ok:
         _mark_posted(conn, article["id"], result)
         log_path = append_post_entry(result, article, reel_meta=reel_meta)
-        print(f"[main] posted OK ({attach}): {result}")
-        print(f"[main] recorded in {log_path}")
+        print(f"[main]   POSTED ({attach}): {result}")
         return {
             "status": "posted",
             "provider": provider,
             "attach": attach,
             "post_id": result,
-            "log_path": log_path,
+            "title": title,
         }
     else:
-        print(f"[main] publish FAILED: {result}")
+        print(f"[main]   PUBLISH FAILED: {result}")
         return {"status": "error", "error": result}
+
+
+def run(include_image=True):
+    from scraper import scrape_all, select_postable
+
+    print(f"[main] === run start {datetime.datetime.utcnow().isoformat()}Z ===")
+    print(f"[main] config: MAX_POSTS_PER_RUN={config.MAX_POSTS_PER_RUN}, "
+          f"DRY_RUN={config.DRY_RUN}, DEDUP_THRESHOLD={config.DEDUP_THRESHOLD}")
+
+    init_db()
+    conn = get_conn()
+
+    # 1. Scrape new articles.
+    try:
+        new, fresh = scrape_all(conn)
+    except Exception as e:
+        print(f"[main] SCRAPE ERROR: {e}")
+        return {"status": "scrape_error", "error": str(e)}
+    print(f"[main] scrape complete: {new} new articles, {len(fresh)} fresh rows returned")
+
+    if not fresh:
+        print("[main] NO FRESH ARTICLES - nothing to do.")
+        return {"status": "no_content"}
+
+    # 2. Post up to MAX_POSTS_PER_RUN articles from the fresh batch.
+    titles_done = []
+    results = []
+    remaining = list(fresh)
+
+    for i in range(config.MAX_POSTS_PER_RUN):
+        if not remaining:
+            break
+
+        article = select_postable(conn, remaining, posted_titles())
+        if article is None:
+            print(f"[main] no more postable articles after {i} posts")
+            break
+
+        print(f"[main] posting {i+1}/{config.MAX_POSTS_PER_RUN}: {article['title'][:80]}")
+        res = _publish_one(article, conn, include_image=include_image)
+        results.append(res)
+
+        if res["status"] == "posted":
+            titles_done.append(article["title"])
+            # Remove the posted article from remaining so next iteration skips it
+            remaining = [r for r in remaining if r.get("url") != article.get("url")]
+        elif res["status"] == "error":
+            # Don't retry on publish failure
+            break
+        else:
+            break
+
+    posted_count = sum(1 for r in results if r["status"] == "posted")
+    print(f"[main] === run end: {posted_count} posts made ===")
+    return {"status": "done", "posted": posted_count, "results": results}
 
 
 def run_match_preview():
@@ -173,8 +200,7 @@ if __name__ == "__main__":
         print(json.dumps(result, default=str))
         sys.exit(0)
 
-    ok = bool(config.FB_PAGE_TOKEN)
-    if not ok:
+    if not config.FB_PAGE_TOKEN:
         print("WARNING: FB_PAGE_TOKEN empty - set env var. Use DRY_RUN=1 to test scrape+AI only.")
     result = run(include_image=True)
     print(json.dumps(result, default=str))

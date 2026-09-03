@@ -1,13 +1,7 @@
 name: WeekendPulse Deploy
 
 on:
-  schedule:
-    # HOURLY daytime check-ins, UK 08:00-23:00 (BST, UTC+1).
-    # Bot posts ONLY when a genuinely new story appears; otherwise no_content.
-    # NOTE: cron runs in UTC. Hour 7-22 UTC = 08:00-23:00 UK while UK is in BST.
-    # When UK clocks go back to GMT (UTC+0) in late Oct, shift to "0 8-23 * * *".
-    - cron: "0 7-22 * * *"
-  workflow_dispatch:        # allow manual trigger for testing
+  workflow_dispatch:        # triggered by cron-job.org + manual testing
 
 jobs:
   post:
@@ -24,7 +18,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests feedparser Pillow google-genai
+        run: pip install requests feedparser Pillow google-genai psd-tools[composite]
 
       - name: Run the bot (scrape -> AI -> post -> log)
         env:
@@ -32,8 +26,9 @@ jobs:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
           DRY_RUN: "0"
-        run: python main.py
+        run: python -u main.py
 
       - name: Commit and push manifest.json if changed
         run: |

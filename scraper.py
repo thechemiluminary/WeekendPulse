@@ -8,7 +8,7 @@ import feedparser
 from datetime import datetime
 import config
 from db import article_exists, insert_article
-from post_log import already_posted
+from manifest import already_posted
 
 
 # Non-football sports that can collide with PL keywords (e.g. "England" cricket,
@@ -174,12 +174,21 @@ def scrape_all(conn):
     """
     new_count = 0
     fresh_ids = []
+    total_entries = 0
+    pl_matched = 0
+    skipped_posted = 0
+    skipped_existing = 0
     for feed_url in config.RSS_FEEDS:
         try:
             feed = feedparser.parse(feed_url)
         except Exception as e:
             print(f"[scraper] feed error {feed_url}: {e}")
             continue
+
+        feed_entries = len(feed.entries)
+        total_entries += feed_entries
+        feed_pl = 0
+        feed_new = 0
 
         for entry in feed.entries:
             title = entry.get("title", "").strip()
@@ -193,16 +202,19 @@ def scrape_all(conn):
                 continue
             if not _matches_pl(title, summary):
                 continue
+            feed_pl += 1
+            pl_matched += 1
 
             image_url = _extract_image(entry)
 
-            # Skip already-published stories (persisted via posts_log across runs).
+            # Skip already-published stories (per manifest).
             if already_posted(link):
+                skipped_posted += 1
                 continue
 
             if article_exists(conn, link):
-                # Backfill image for existing rows that lack one (cheap re-scrape).
                 _backfill_image(conn, link, image_url)
+                skipped_existing += 1
                 continue
 
             inserted = insert_article(
@@ -217,9 +229,13 @@ def scrape_all(conn):
             )
             if inserted:
                 new_count += 1
+                feed_new += 1
                 fresh_ids.append(conn.execute(
                     "SELECT id FROM articles WHERE url = ?", (link,)
                 ).fetchone()["id"])
+
+        short_url = feed_url.split("/")[2] if "//" in feed_url else feed_url
+        print(f"[scraper] {short_url}: {feed_entries} entries, {feed_pl} PL-matched, {feed_new} new")
 
     # Fetch full rows for the freshly-inserted ids, newest scraped first.
     rows = []
@@ -230,6 +246,9 @@ def scrape_all(conn):
             tuple(fresh_ids),
         ).fetchall()
 
+    print(f"[scraper] TOTAL: {total_entries} entries across {len(config.RSS_FEEDS)} feeds, "
+          f"{pl_matched} PL-matched, {skipped_posted} already-posted, "
+          f"{skipped_existing} existing-in-DB, {new_count} NEW inserted")
     return new_count, rows
 
 
@@ -278,4 +297,7 @@ def select_postable(conn, fresh_rows, posted_titles):
         chosen_title = title
         break
 
+    print(f"[scraper] select_postable: {len(fresh_rows)} fresh -> "
+          f"{len(fresh)} after URL-dedup -> {len(kept)} after fuzzy-dedup -> "
+          f"{'picked: ' + (chosen['title'][:60] if chosen else 'NONE')}")
     return chosen
