@@ -405,8 +405,11 @@ FALLBACK PROVIDER EXPANSION: CEREBRAS + NVIDIA NIM (2026-09-03, per user):
   build.nvidia.com). Cerebras free tier is uncertain (some show a permanent
   1M tokens/day, official pricing lists a $5 one-time trial credit expiring in
   30 days) - still worth wiring since it is a SEPARATE quota from Groq/Gemini.
-- Both providers host the gpt-oss-120b model family (same as existing Groq
-  openai/gpt-oss-20b) so output style stays consistent.
+- Both providers host the gpt-oss family, matching existing Groq output style.
+  MODEL FIX (2026-09-03): Cerebras default = gpt-oss-120b; NIM default was
+  first set to openai/gpt-oss-120b but NIM no longer hosts 120b -> FIXED to
+  openai/gpt-oss-20b (identical to the Groq model, so fallback output is the
+  same). NIM default model = openai/gpt-oss-20b (commit 31e7d63).
 - Final provider chains (all OpenAI-compatible, JSON contract unchanged):
     * News posts (turn_article_into_post_json / _generate_once):
           GEMINI -> GROQ -> CEREBRAS -> NIM -> skip (retry x3)
@@ -417,7 +420,7 @@ FALLBACK PROVIDER EXPANSION: CEREBRAS + NVIDIA NIM (2026-09-03, per user):
 - CODE CHANGED:
     [ x ] config.py: CEREBRAS_API_KEY/BASE_URL(https://api.cerebras.ai/v1)/MODEL
           (gpt-oss-120b) + NIM_API_KEY/BASE_URL(https://integrate.api.nvidia.com/v1)
-          /MODEL(openai/gpt-oss-120b) - all env-overridable.
+          /MODEL(openai/gpt-oss-20b) - all env-overridable.
     [ x ] ai_processor.py: _generate_with_openai_compat() generic caller +
           _generate_with_cerebras/_generate_with_nim (max_tokens 2500 + JSON
           mode); added Cerebras+NIM rungs to _generate_once + turn_fixture_into_post.
@@ -432,7 +435,8 @@ FALLBACK PROVIDER EXPANSION: CEREBRAS + NVIDIA NIM (2026-09-03, per user):
     [ ] reel_batch.yml: no change (no AI calls).
 - PENDING USER ACTION: add CEREBRAS_API_KEY (cloud.cerebras.ai) + NIM_API_KEY
   (build.nvidia.com) to GitHub Actions secrets, then live-verify both providers
-  (model slug gpt-oss-120b / openai/gpt-oss-120b) - mock tests passed locally.
+  (model slugs: Cerebras gpt-oss-120b, NIM openai/gpt-oss-20b) - mock tests
+  passed locally.
 
 NEXT:
 [ ] USER: add OPENROUTER_API_KEY to GitHub Actions secrets, then workflow_dispatch
@@ -487,6 +491,13 @@ NEXT:
 [ ] Live workflow_dispatch test of "WeekendPulse Social Engine" (collect.yml)
     to confirm cloud run end-to-end (should at least collect + possibly post
     text-only).
+
+    MANUAL "Run workflow" BEHAVIOR (2026-09-03, VERIFIED): clicking Run fires a
+    single check-in = collect (always) + social, but --social only produces a
+    Telegram draft if the check-in lands within a slot window. Off-slot manual
+    runs just collect + no-op (status off_slot, no draft). To SEE a draft
+    on-demand, either run inside a slot window, or wait for the real 5-min
+    cron-job.
 
 =====================================================================
 PHASE 3e - SEMI-AUTO TELEGRAM SOCIAL MODE (pivot from auto-publish)
