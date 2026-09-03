@@ -443,6 +443,33 @@ NEXT:
     (Existing cron-job drives post.yml hourly; create a new cron-job for the
     Social Engine at every 5 min. The 5-min cadence lands exactly on XX:00 /
     XX:30 UK -> gates the 11:30/14:00/15:00/16:00/19:00/20:00 slots.)
+
+    HOW THE 5-MIN CHECK-IN WORKS (single cron-job drives BOTH steps):
+      - Each check-in runs two steps in sequence in collect.yml:
+          1. python main.py --collect  -> scrape FabrizioRomanoTG + r/soccer
+             into social_state.json (NO AI, cheap, runs EVERY 5 min -> pool
+             is always fresh).
+          2. python main.py --social   -> run_social() SELF-GATES:
+             _active_social_slot() compares current UK time to the 6 slots
+             within a 10-min window; if off-slot it no-ops (no AI). Only when
+             a slot window is hit does it generate AI candidates (OpenRouter/
+             Groq/Cerebras/NIM), pick the best, and SEND THE DRAFT TO TELEGRAM
+             (semi-auto). So AI fires ~6x/day, not 288x/day.
+
+    CRON-JOB.ORG SETUP (external, manual - no GitHub schedule):
+      - Cron-job mode: "every N minutes", N = 5  (fires XX:00,05,...,55 ->
+        covers the :00 slots and the :30 slot).
+      - Method: POST to the Actions API (same PAT pattern as the post.yml cron):
+          URL:  https://api.github.com/repos/thechemiluminary/WeekendPulse/actions/workflows/collect.yml/dispatches
+          Header: Authorization: Bearer <GH_TOKEN>   (PAT with `workflow` scope)
+          Body:  {"ref":"main"}
+      - Test with cURL (local):
+          curl -X POST -H "Authorization: Bearer <GH_TOKEN>" -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/thechemiluminary/WeekendPulse/actions/workflows/collect.yml/dispatches \
+            -d "{\"ref\":\"main\"}"
+      - After creating it, run workflow_dispatch once to confirm the ribbon
+        fires at the next slot and the Telegram draft arrives.
+
 [ ] Live workflow_dispatch test of "WeekendPulse Social Engine" (collect.yml)
     to confirm cloud run end-to-end (should at least collect + possibly post
     text-only).
