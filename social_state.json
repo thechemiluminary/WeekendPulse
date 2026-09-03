@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T18:12:49.665361+00:00",
+  "last_collect_utc": "2026-09-03T18:36:03.170253+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -80,6 +80,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T18:12:49.665351+00:00",
       "hash": "3538969"
+    },
+    {
+      "text": "[Who Scored] Emiliano Martinez has created more big chances (1) than Aston Villa (0) have this season | https://www.reddit.com/r/soccer/comments/1w6fw7w/who_scored_emiliano_martinez_has_created_more_big/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T18:36:03.170245+00:00",
+      "hash": "4048122"
     }
   ],
   "posted": [],
@@ -98,6 +104,7 @@
     "3443052",
     "6252615",
     "4341126",
-    "3538969"
+    "3538969",
+    "4048122"
   ]
 }
