@@ -46,6 +46,7 @@ jobs:
           FOOTBALL_API_TOKEN: ${{ secrets.FOOTBALL_API_TOKEN }}
           SOCIAL_ENABLED: "1"
           SOCIAL_SEMIAUTO: "1"
+          SOCIAL_POOL_LIMIT: "15"
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           DRY_RUN: "0"

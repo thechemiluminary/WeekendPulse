@@ -129,6 +129,10 @@ SOCIAL_POST_SLOTS = [(11, 30), (14, 0), (15, 0), (16, 0), (19, 0), (20, 0)]
 SOCIAL_FIRE_WINDOW_MIN = int(os.environ.get("SOCIAL_FIRE_WINDOW_MIN", "10"))
 SOCIAL_GROUNDED = os.environ.get("SOCIAL_GROUNDED", "1") == "1"
 SOCIAL_NUM_CANDIDATES = int(os.environ.get("SOCIAL_NUM_CANDIDATES", "4"))
+# How many pooled talking points are sent to the AI per request. Keeps the
+# prompt small/inside model input limits even if many channels/subreddits are
+# configured (collector may still ingest more; only the prompt is capped).
+SOCIAL_POOL_LIMIT = int(os.environ.get("SOCIAL_POOL_LIMIT", "15"))
 SOCIAL_EMBED_MODEL = os.environ.get("SOCIAL_EMBED_MODEL", GEMINI_MODEL)
 # Sources ingested by the 5-min collector (free, stable, token-less).
 SOCIAL_TELEGRAM_CHANNELS = os.environ.get(

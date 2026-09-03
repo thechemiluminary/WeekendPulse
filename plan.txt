@@ -439,6 +439,20 @@ NEXT:
     on collect.yml to verify cloud end-to-end (text-only, OpenRouter).
 [ ] (Optional) Revisit real web images later: Gemini Search Grounding needs an
     activated Gemini API; no image source on the current OpenRouter path.
+
+[ x ] PERMANENT DEDUPE + PROMPT SIZE CAP (2026-09-03):
+    - social_state.json: added persistent "seen" hash list (permanent dedupe).
+      add_talking_point() checks `seen` FIRST: a post whose hash was ever
+      collected is NEVER re-fed to the AI again, even after the rolling pool
+      resets at midnight. Backfilled `seen` with the current pool's 13 hashes.
+    - Prompt size cap: new SOCIAL_POOL_LIMIT (config.py, default 15, env-
+      overridable) bounds how many pool posts are sent per AI request
+      (was hardcoded 60 -> ~18K chars; now ~15 max, safely under model input
+      limits even after adding more channels/subreddits). pool_texts() + 
+      _build_prompt() both honor it. collect.yml passes SOCIAL_POOL_LIMIT=15.
+    - CHANNELS config lives in collect.yml lines 32-33 (SOCIAL_TELEGRAM_CHANNELS
+      and SOCIAL_REDDIT_SUBS, comma-separated) - defaults in config.py:134-138.
+    - USER: add channels later manually in collect.yml (comma-separated).
 [ ] USER: add a cron-job.org entry firing collect.yml every 5 min.
     (Existing cron-job drives post.yml hourly; create a new cron-job for the
     Social Engine at every 5 min. The 5-min cadence lands exactly on XX:00 /

@@ -222,7 +222,7 @@ def _build_prompt():
             )
     except Exception as e:
         print(f"[social_ai] fixtures note: {e}")
-    pool = social_state.pool_texts(limit=60)
+    pool = social_state.pool_texts(limit=config.SOCIAL_POOL_LIMIT)
     pool_block = "\n".join(f"- {t}" for t in pool) or "(nothing collected yet)"
 
     template = _load_social_prompt()

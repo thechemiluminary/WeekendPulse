@@ -19,6 +19,8 @@ from config import BASE_DIR
 SOCIAL_PATH = os.path.join(BASE_DIR, "social_state.json")
 _MAX_POOL = 80          # cap pooled talking points so the file stays small
 _MAX_HISTORY = 400      # cap stored history
+# cap the persistent "seen" hash history (permanent dedupe marker set)
+_MAX_SEEN = 2000
 
 
 def _default():
@@ -27,6 +29,7 @@ def _default():
         "today": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "posted_today": 0,
         "pool": [],          # [{text, source, ts_utc, hash}]
+        "seen": [],          # persistent hashes never re-fed to the AI (dedupe)
         "posted": [],        # [{ts_utc, format, topic, post_text, post_id, image_url}]
         "drafts": [],        # semi-auto drafts sent to Telegram (NOT counted in posted_today)
         "engagement": [],    # [{post_id, ts_utc, reactions, comments, shares}] appended later
@@ -51,6 +54,7 @@ def load():
         data.setdefault("drafts", [])
         data.setdefault("engagement", [])
         data.setdefault("pool", [])
+        data.setdefault("seen", [])
         return data
     except Exception:
         return _default()
@@ -66,12 +70,21 @@ def save(data):
 
 
 def add_talking_point(text, source, hash_slug=None):
-    """Add a talking point to the pool (dedup by hash if provided). Returns True if added."""
+    """Add a talking point to the pool (dedup by hash if provided). Returns True if added.
+
+    Dedupe is PERMANENT: a hash is recorded in the persistent `seen` list the
+    first time it is collected and is never fed to the AI again on any day,
+    even after the rolling `pool` resets at midnight.
+    """
     if not text or not text.strip():
         return False
     text = text.strip()
     data = load()
     slug = hash_slug or str(abs(hash(text)) % 10_000_000)
+    # Permanent dedupe: skip anything already collected on any past day.
+    if slug in data.get("seen", []):
+        return False
+    # Sanity check the current pool too (hash or identical text).
     for p in data["pool"]:
         if p.get("hash") == slug or p.get("text") == text:
             return False
@@ -81,6 +94,11 @@ def add_talking_point(text, source, hash_slug=None):
         "ts_utc": datetime.now(timezone.utc).isoformat(),
         "hash": slug,
     })
+    # Record the hash permanently so it is never re-collected.
+    seen = data.setdefault("seen", [])
+    seen.append(slug)
+    if len(seen) > _MAX_SEEN:
+        data["seen"] = seen[-_MAX_SEEN:]
     # keep newest-ish: drop oldest beyond cap
     if len(data["pool"]) > _MAX_POOL:
         data["pool"] = data["pool"][-_MAX_POOL:]
@@ -148,8 +166,11 @@ def recent_topics(total=25):
     return topics[-total:]
 
 
-def pool_texts(limit=60):
+def pool_texts(limit=None):
     """Return pooled talking-point texts, newest first, for the AI prompt."""
+    if limit is None:
+        from config import SOCIAL_POOL_LIMIT
+        limit = SOCIAL_POOL_LIMIT
     data = load()
     items = list(data["pool"])
     items.sort(key=lambda p: p.get("ts_utc", ""), reverse=True)
