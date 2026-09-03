@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T19:15:16.537839+00:00",
+  "last_collect_utc": "2026-09-03T19:30:21.843203+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -92,6 +92,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T19:15:16.537832+00:00",
       "hash": "7846572"
+    },
+    {
+      "text": "Cracovia sign Eritrea international Siem Eyob-Abraha from Sheffield United U18 | https://www.reddit.com/r/soccer/comments/1w6hgfg/cracovia_sign_eritrea_international_siem/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T19:30:21.842637+00:00",
+      "hash": "6837515"
+    },
+    {
+      "text": "Premier League clubs' home kit | https://www.reddit.com/r/soccer/comments/1w6hd1v/premier_league_clubs_home_kit/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T19:30:21.843196+00:00",
+      "hash": "1047798"
     }
   ],
   "posted": [],
@@ -120,7 +132,9 @@
     "4341126",
     "3538969",
     "4048122",
-    "7846572"
+    "7846572",
+    "6837515",
+    "1047798"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
