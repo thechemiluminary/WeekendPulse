@@ -37,7 +37,7 @@ CEREBRAS_MODEL = os.environ.get("CEREBRAS_MODEL", "gpt-oss-120b")
 # NVIDIA NIM: free OpenAI-compatible endpoint (replaces the retired GitHub Models).
 NIM_API_KEY = os.environ.get("NIM_API_KEY", "")
 NIM_BASE_URL = os.environ.get("NIM_BASE_URL", "https://integrate.api.nvidia.com/v1")
-NIM_MODEL = os.environ.get("NIM_MODEL", "openai/gpt-oss-120b")
+NIM_MODEL = os.environ.get("NIM_MODEL", "openai/gpt-oss-20b")
 
 # --- Semi-auto social mode ---
 # When enabled, the social engine does NOT auto-publish to Facebook. Instead it
