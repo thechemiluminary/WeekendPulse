@@ -27,7 +27,7 @@ def _publish_one(article, conn, include_image=True):
     """Generate AI post + publish one article. Returns a result dict."""
     title = article["title"]
     summary = article["summary"] or ""
-    image_url = article.get("image_url")
+    image_url = article["image_url"] if "image_url" in article.keys() else None
     print(f"[main]   article: {title[:80]}")
 
     if config.DRY_RUN:
@@ -110,7 +110,7 @@ def run(include_image=True):
         if res["status"] == "posted":
             titles_done.append(article["title"])
             # Remove the posted article from remaining so next iteration skips it
-            remaining = [r for r in remaining if r.get("url") != article.get("url")]
+            remaining = [r for r in remaining if (r["url"] if "url" in r.keys() else None) != (article["url"] if "url" in article.keys() else None)]
         elif res["status"] == "error":
             # Don't retry on publish failure
             break
