@@ -347,13 +347,42 @@ CODE DONE (2026-09-03):
   NOTE: main Gemini key hit quota (429) locally -> engine fell back to Groq.
   Real grounded-image path needs the separate GEMINI_KEY_SOCIAL (2nd account).
 
+COMMITTED + PUSHED (b3bf2fa -> main, 10 files, +1172):
+- config.py, main.py, plan.txt modified
+- new: .github/workflows/collect.yml, prompts/social_post.txt,
+  social_ai.py, social_collect.py, social_state.json, social_state.py,
+  social_style.py
+- collect.yml CONFIRMED live on GitHub ("WeekendPulse Social Engine",
+  workflow id 349418029, state=active).
+
+VERIFICATION STATUS (as of committing):
+- Collector: VERIFIED live (Telegram via t.me/s/<ch> web preview + Reddit RSS +
+  fixtures). Telegram direct-HTML works after RSSHub public instance 403d.
+- Text engine: VERIFIED live via Groq fallback (Gemini main key quota-exhausted
+  429; provider chain falls through correctly).
+- NEW GEMINI_KEY_SOCIAL (2nd account) TEST RESULT (2026-09-03):
+    * key is DIFFERENT from main key (prefix AQ.Ab8RN6Izs... valid-length)
+    * NON-grounded call -> 403 PERMISSION_DENIED "Your project has been denied
+      access. Please contact support."  => Gemini API NOT yet enabled/activated
+      on the 2nd account's project.
+    * GROUNDED call -> 429 RESOURCE_EXHAUSTED (same enabled-project issue).
+  CONCLUSION: the real grounded-IMAGE path is blocked until the 2nd account's
+  project is activated for the Gemini API. Engine still runs (posts text via
+  Groq fallback) but WITHOUT real web images until this is fixed.
+
 NEXT:
-[   ] USER: create a 2nd Google/Gemini account, add its key as GitHub secret
-      GEMINI_KEY_SOCIAL (provider chain already falls back if unset)
-[   ] USER: add a cron-job.org entry firing collect.yml every 5 min
-      (existing cron-job drives post.yml hourly; new one drives collect.yml)
-[   ] Commit + push Phase 3d (workflows, social_* modules, social_state.json)
-[   ] Live workflow_dispatch test: verify a generated post + grounded image
+[ ] USER: activate Gemini API on the 2nd account/project behind GEMINI_KEY_SOCIAL
+    (403 = API not enabled; enable it in Google AI Studio / Cloud Console).
+    Re-test grounded image call after activation.
+[ ] USER: add a cron-job.org entry firing collect.yml every 5 min.
+    (Existing cron-job drives post.yml hourly; create a new cron-job for the
+    Social Engine at every 5 min. The 5-min cadence lands exactly on XX:00 /
+    XX:30 UK -> gates the 11:30/14:00/15:00/16:00/19:00/20:00 slots.)
+[ ] USER: add GEMINI_KEY_SOCIAL value already saved to GitHub secret (confirmed
+    user added it; API can't read back secret values - trust user save).
+[ ] Live workflow_dispatch test of "WeekendPulse Social Engine" (collect.yml)
+    to confirm cloud run end-to-end (should at least collect + possibly post
+    text-only while Gemini key inactive).
 
 =====================================================================
 PHASE 4 - MONITORING & REFINEMENT
