@@ -295,6 +295,20 @@ NEXT:
 [   ] Note: the earlier live-scheduled Ipswich/Liverpool post used the OLD card;
       use the template card for future scheduled posts.
 
+PHASE 3c-2 LIVE RESCHEDULE + FIX (2026-09-03):
+- Deleted the OLD scheduled Ipswich-vs-Liv post (old card + old caption).
+- Rescheduled a FRESH post (122093745861475216) at 2026-09-04 14:00 UTC using the
+  NEW template card (Anton kickoff, local crests). Verified live on Page as the
+  only scheduled_posts entry.
+- BUG FOUND+FIXED: the "template" provider post text contained a surrogate emoji
+  (U+1F447) - any real publish would crash with "surrogates not allowed" at the
+  requests multipart UTF-8 encode. Added publisher.sanitize_text() (UTF-16
+  round-trip w/ surrogatepass -> normalizes pairs to real astral chars, replaces
+  lone surrogates). Applied to post_text / post_text_with_image_url /
+  post_text_with_image / schedule_post. Verified: emoji preserved as U+1F447,
+  text UTF-8-encodable. Commit 65ebbd1 (pushed).
+- Manifest match_key dedup verified working after reschedule (already_posted_fixture=True).
+
 =====================================================================
 PHASE 4 - MONITORING & REFINEMENT
 =====================================================================
