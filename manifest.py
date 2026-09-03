@@ -101,14 +101,14 @@ def append_post_entry(post_id, article_row, reel_meta=None):
     """
     reel_meta = reel_meta or {}
     worthy = bool(reel_meta.get("reel_worthy"))
-    title = article_row.get("title", "") if hasattr(article_row, "get") else ""
-    url = article_row.get("url", "") if hasattr(article_row, "get") else ""
-    image_url = article_row.get("image_url", "") if hasattr(article_row, "get") else ""
+    title = article_row["title"] if "title" in article_row.keys() else ""
+    url = article_row["url"] if "url" in article_row.keys() else ""
+    image_url = article_row["image_url"] if "image_url" in article_row.keys() else ""
     entry = {
         "posted_at_utc": datetime.now(timezone.utc).isoformat(),
         "post_id": post_id or "",
         "title": title or "",
-        "description": (article_row.get("title") if hasattr(article_row, "get") else "") or "",
+        "description": (article_row["title"] if "title" in article_row.keys() else "") or "",
         "url": url or "",
         "image_url": image_url or "",
         "reel_approved": worthy,
