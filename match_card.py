@@ -12,7 +12,7 @@ scheduler never crashes.
 import os
 import io
 import requests
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 import config
 from config import IMAGE_DIR, MATCH_TEMPLATE_PSD, FONT_ANTON
@@ -94,10 +94,12 @@ def _load_crest_image(fx, side):
     return None
 
 
-def _paste_crest_contain(canvas, crest, box):
+def _paste_crest_contain(canvas, crest, box, shadow_radius=8, shadow_alpha=80, shadow_color=(255, 255, 255)):
     """
     Paste a crest image contained within box (x0,y0,x1,y1) preserving aspect
-    ratio + transparency, centred in the box.
+    ratio + transparency, centred in the box.  Adds a soft white shadow
+    surrounding all edges equally (zero-offset) so the crest reads cleanly
+    on the card.
     """
     if crest is None:
         return
@@ -105,10 +107,24 @@ def _paste_crest_contain(canvas, crest, box):
     bw, bh = x1 - x0, y1 - y0
     scale = min(bw / crest.width, bh / crest.height)
     nw, nh = max(1, int(crest.width * scale)), max(1, int(crest.height * scale))
-    c = crest.resize((nw, nh), Image.LANCZOS)
+    c = crest.resize((nw, nh), Image.LANCZOS).convert("RGBA")
     cx = x0 + (bw - nw) // 2
     cy = y0 + (bh - nh) // 2
-    canvas.alpha_composite(c.convert("RGBA"), (cx, cy))
+
+    # Build shadow: silhouette of the crest in shadow_color, blurred outward
+    # (subtle, barely noticeable). Zero offset - surrounds all edges equally.
+    pad = shadow_radius * 2
+    sw, sh = nw + pad, nh + pad
+    shadow = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    # Create silhouette copy of crest (preserve alpha shape), scaled down in
+    # alpha so the shadow stays faint
+    col_crest = Image.new("RGBA", c.size, (*shadow_color, shadow_alpha))
+    col_crest.putalpha(c.split()[3].point(lambda a: int(a * (shadow_alpha / 255))))
+    shadow.paste(col_crest, (shadow_radius, shadow_radius))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=shadow_radius))
+    canvas.alpha_composite(shadow, (cx - shadow_radius, cy - shadow_radius))
+
+    canvas.alpha_composite(c, (cx, cy))
 
 
 def _anton_font(size):
