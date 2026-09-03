@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T14:17:03.743673+00:00",
+  "last_collect_utc": "2026-09-03T18:12:49.665361+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -62,8 +62,27 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T14:17:03.743673+00:00",
       "hash": "3443052"
+    },
+    {
+      "text": "🚨 🔵 ⚪️ OFFICIAL: Gabriel Martinelli joins Al Hilal on €70m package deal from Arsenal. Record sale for #AFC with also a sell-on clause secured as part of the agreement. The exclusive story on Martinelli added as part of Hilal list, now reality. 🇧🇷 https://t.co/WOjs8Vhk9P — Fabrizio Romano ( @Fabrizio",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-03T18:12:49.299255+00:00",
+      "hash": "6252615"
+    },
+    {
+      "text": "🚨 ❌ Richarlison has been left out of Tottenham Premier League squad. https://t.co/ItAMJUp7CQ — Fabrizio Romano ( @FabrizioRomano ) Sep 3, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-03T18:12:49.299783+00:00",
+      "hash": "4341126"
+    },
+    {
+      "text": "[Alasdair Gold]: De Zerbi leaves last season’s top scorer Richarlison out of Tottenham’s 25-man Premier League squad, with injured Xavi Simons and Wilson Odobert included | https://www.reddit.com/r/soccer/comments/1w6dcvt/alasdair_gold_de_zerbi_leaves_last_seasons_top/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T18:12:49.665351+00:00",
+      "hash": "3538969"
     }
   ],
   "posted": [],
-  "engagement": []
+  "engagement": [],
+  "drafts": []
 }
