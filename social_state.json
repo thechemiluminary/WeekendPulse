@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T18:36:03.170253+00:00",
+  "last_collect_utc": "2026-09-03T19:00:25.824726+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -90,7 +90,15 @@
   ],
   "posted": [],
   "engagement": [],
-  "drafts": [],
+  "drafts": [
+    {
+      "ts_utc": "2026-09-03T19:00:25.824714+00:00",
+      "date": "2026-09-03",
+      "format": "lineup_vote",
+      "topic": "richarlison-squad-exclusion",
+      "post_text": "🔥 𝗥𝗜𝗖𝗛𝗔𝗥𝗟𝗜𝗦𝗢𝗡 𝗢𝗨𝗧 of Tottenham's squad! The top scorer of last season is left out while injured stars get a slot. Is De Zerbi playing favourites or is it a tactical gamble? Who do you think should have been in the squad? -> Drop your verdict! #WeekendPulse #Richarlison"
+    }
+  ],
   "seen": [
     "9856639",
     "6643684",
@@ -106,5 +114,9 @@
     "4341126",
     "3538969",
     "4048122"
-  ]
+  ],
+  "last_fired_slot": {
+    "date": "2026-09-03",
+    "slot": "20:00"
+  }
 }
