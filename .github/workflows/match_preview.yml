@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests feedparser Pillow google-genai
+        run: pip install requests feedparser Pillow google-genai "psd-tools[composite]"
 
       - name: Run match-preview scheduler (fetch fixtures -> schedule posts)
         env:

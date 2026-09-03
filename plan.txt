@@ -253,6 +253,51 @@ PHASE 3c RESULTS (2026-09-03) - LIVE TEST PASSED:
   560566, scheduled_publish_time 1788530400, status "scheduled"); dedup active.
 - Committed + pushed as f0f932d.
 
+=====================================================================
+PHASE 3c-2 - TEMPLATE-DRIVEN MATCH CARD + ANTON FONT (per user)
+=====================================================================
+Problem fixed: the code-built match card looked ugly (bad gradient, overlapping
+text). Solution: user designs the PSD template; pipeline only swaps crests +
+kickoff text into named slots.
+
+DECISIONS (locked 2026-09-03):
+- Template = user's MATCH_TEMPLATE_PSD.psd (1080x1350 RGB). psd-tools composites
+  it as the design; slot geometry read from named layers.
+- Slots: 'Home', 'Away' = empty shape layers (transparent) where crests go;
+  'kickoff' = band where the kickoff time goes. No team-name slots (condensed).
+- Crests come from LOCAL logos/PL/*.png (20 x 1500x1500 transparent PNGs)
+  instead of remote download. crests.py maps football-data names -> local file,
+  remote crests.football-data.org as fallback.
+- Kickoff text: ANTON font (Google Fonts, OFL), ALL-CAPS, white, centered in the
+  kickoff slot. Also used for REEL TITLE cards (all-caps) going forward.
+- Fallback: if PSD missing/unloadable, render a simple card (never crash).
+
+CODE DONE (2026-09-03):
+[ x ] data/fonts/Anton-Regular.ttf downloaded (170KB) + committed
+[ x ] config.py: MATCH_TEMPLATE_PSD, LOGOS_DIR, FONT_ANTON, kickoff size/color;
+      moved BASE_DIR to top so constants can reference it
+[ x ] crests.py: local_logo_path() + resolve_crest() (name normalizer FM->file)
+[ x ] match_card.py rewritten: _load_template() (psd-tools composite + slot
+      bounds), _paste_crest_contain() (aspect+transparency), _draw_kickoff()
+      (Anton all-caps, auto-shrink to fit), _build_fallback()
+[ x ] builder_reel/story_src/reel_render.py: _find_font prefers Anton;
+      _make_title_card() upper()s the title
+[ x ] builder_reel/03_assets.py: downloads Anton into Colab assets + REEL_ROOT
+[ x ] news_reel.ipynb rebuilt (8 cells) with updated renderer/assets
+[ x ] match_preview.yml: pip install adds psd-tools[composite]
+[ x ] VERIFIED: PSD slots read (Home (389,320,691,622), Away (389,728,691,1030),
+      kickoff (224,1136,857,1289)); card built for Ipswich vs Liverpool w/ local
+      logos (blue Ipswich + red Liverpool in slots, white Anton kickoff) - no
+      overlap. py_compile + reel_validate ALL PASS.
+
+NEXT:
+[   ] Commit + push Phase 3c-2 (template, logos, fonts, code) to main
+[   ] Note: the earlier live-scheduled Ipswich/Liverpool post used the OLD card;
+      use the template card for future scheduled posts.
+
+=====================================================================
+PHASE 4 - MONITORING & REFINEMENT
+=====================================================================
 [   ] Week 1: check engagement (likes/comments/shares) on posts
 [   ] Identify which post types perform best
 [   ] Tune AI prompt (prompts/debate_post.txt) based on results

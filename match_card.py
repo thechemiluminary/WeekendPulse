@@ -1,157 +1,188 @@
 """
-WeekendPulse - Match-preview VS card generator.
-Composes a 1080x1350 (4:5 portrait) card with the two clubs' REAL crests
-(downloaded from crests.football-data.org), a center "VS", a WeekEndPulse
-"TONIGHT" header and the kickoff time. If a crest fails to download it falls
-back to a team-colour split so the scheduler never crashes.
+WeekendPulse - Match-preview VS card generator (template-driven).
+Composites a user-designed 1080x1350 PSD template (MATCH_TEMPLATE_PSD.psd) and
+places the two clubs' REAL LOCAL crests (logos/PL/*.png) into the Home/Away
+slot layers, plus the kickoff time (Anton, all-caps) into the kickoff slot
+layer. The PSD defines the design + slot geometry via named shape layers, so
+layout is always pixel-perfect (no code-guessed overlap).
+
+If the PSD cannot be loaded, falls back to a simple rectangle card so the
+scheduler never crashes.
 """
 import os
 import io
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-from config import IMAGE_DIR
-from image_gen import _find_font, _wrap_text
+import config
+from config import IMAGE_DIR, MATCH_TEMPLATE_PSD, FONT_ANTON
+import crests
 
 W, H = 1080, 1350
-ACCENT = "#FF6B00"
 WHITE = "#FFFFFF"
 DARK = "#10131A"
-MID = "#1C2230"
 
 _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) WeekendPulse bot/1.0"
 
 
-def _load_crest(url):
-    """Download a crest; return a RGBA PIL image or None on any failure."""
-    if not url:
-        return None
+# --------------------------------------------------------------------------
+# Template / slot loading via psd-tools
+# --------------------------------------------------------------------------
+def _load_template():
+    """
+    Return (canvas_rgba, slot_bounds) where slot_bounds is a dict:
+        {"home": (x0,y0,x1,y1), "away": ..., "kickoff": ...}
+    Each is the bounding box of the named shape layer. Returns (None, {})
+    on any failure (caller falls back).
+    """
+    if not os.path.exists(MATCH_TEMPLATE_PSD):
+        print("[match_card] template not found, using fallback")
+        return None, {}
     try:
-        r = requests.get(url, headers={"User-Agent": _UA}, timeout=20)
-        r.raise_for_status()
-        return Image.open(io.BytesIO(r.content)).convert("RGBA")
+        from psd_tools import PSDImage
+        psd = PSDImage.open(MATCH_TEMPLATE_PSD)
+        canvas = psd.composite().convert("RGBA")
+        slots = {}
+        # match by name (case-insensitive, allow home/away_crest variants)
+        def find(n):
+            for lay in psd:
+                if lay.name.lower() == n:
+                    return lay
+            return None
+        for key, names in (
+            ("home", ("home", "home_crest")),
+            ("away", ("away", "away_crest")),
+            ("kickoff", ("kickoff", "kickoff_slot")),
+        ):
+            for n in names:
+                lay = find(n)
+                if lay is not None:
+                    b = lay.bbox
+                    slots[key] = tuple(int(v) for v in b)
+                    break
+        return canvas, slots
     except Exception as e:
-        print(f"[match_card] crest download failed ({url}): {e}")
-        return None
+        print(f"[match_card] template load failed ({e}), using fallback")
+        return None, {}
 
 
-def _team_color(name):
-    t = (name or "").lower()
-    for key, color in _TEAM_COLORS.items():
-        if key in t:
-            return color
-    return "#3D195B"
+def _load_crest_image(fx, side):
+    """
+    Resolve + open the crest for home/away as RGBA, or None.
+    Prefers local logos/PL/*.png; falls back to remote URL.
+    """
+    key = "home" if side == "home" else "away"
+    team = fx.get(key) or fx.get(f"{key}_tla") or ""
+    remote = fx.get(f"{key}_crest") or (fx.get(f"{key}_id") and
+                                        f"https://crests.football-data.org/{fx.get(f'{key}_id')}.png")
+    src, found = crests.resolve_crest(team, remote)
+    if src == "local":
+        try:
+            return Image.open(found).convert("RGBA")
+        except Exception as e:
+            print(f"[match_card] local crest open failed ({found}): {e}")
+            return None
+    if src == "remote":
+        try:
+            r = requests.get(found, headers={"User-Agent": _UA}, timeout=20)
+            r.raise_for_status()
+            return Image.open(io.BytesIO(r.content)).convert("RGBA")
+        except Exception as e:
+            print(f"[match_card] remote crest download failed ({found}): {e}")
+            return None
+    print(f"[match_card] no crest for team '{team}'")
+    return None
 
 
-def _paste_crest_padded(canvas, draw, crest, cx, cy, size, name, round_canvas):
-    box_w = int(size * 1.45)
-    box_h = int(size * 1.1)
-    left = cx - box_w // 2
-    top = cy - box_h // 2
-    draw.rounded_rectangle([left, top, left + box_w, top + box_h], radius=28,
-                           fill=MID, outline=(255, 255, 255, 60), width=4)
-    if crest is not None:
-        c = crest.resize((size, size), Image.LANCZOS)
-        # round the crest corners a touch
-        mask = Image.new("L", (size, size), 0)
-        md = ImageDraw.Draw(mask)
-        md.rounded_rectangle([0, 0, size, size], radius=int(size * 0.12), fill=255)
-        canvas.paste(c, (cx - size // 2, cy - size // 2), mask)
-    font = _find_font(40, bold=True)
-    label = _wrap_text(name, 14)
-    yy = top + box_h + 22
-    for line in label[:2]:
-        lw = draw.textlength(line, font=font)
-        draw.text(((W - lw) / 2, yy), line, fill=WHITE, font=font)
-        yy += font.size + 6
+def _paste_crest_contain(canvas, crest, box):
+    """
+    Paste a crest image contained within box (x0,y0,x1,y1) preserving aspect
+    ratio + transparency, centred in the box.
+    """
+    if crest is None:
+        return
+    x0, y0, x1, y1 = box
+    bw, bh = x1 - x0, y1 - y0
+    scale = min(bw / crest.width, bh / crest.height)
+    nw, nh = max(1, int(crest.width * scale)), max(1, int(crest.height * scale))
+    c = crest.resize((nw, nh), Image.LANCZOS)
+    cx = x0 + (bw - nw) // 2
+    cy = y0 + (bh - nh) // 2
+    canvas.alpha_composite(c.convert("RGBA"), (cx, cy))
 
 
+def _anton_font(size):
+    """Return Anton font at the given size, or a bold fallback."""
+    if os.path.exists(FONT_ANTON):
+        return ImageFont.truetype(FONT_ANTON, size)
+    from image_gen import _find_font
+    return _find_font(size, bold=True)
+
+
+def _draw_kickoff(canvas, text, box):
+    """Draw the kickoff label (Anton, all-caps) centred in box."""
+    if not box:
+        return
+    x0, y0, x1, y1 = box
+    label = (text or "KICKOFF TONIGHT").upper()
+    size = config.MATCH_KICKOFF_FONT_SIZE
+    color = config.MATCH_KICKOFF_COLOR
+    draw = ImageDraw.Draw(canvas)
+    # shrink font so text fits the box width
+    font = _anton_font(size)
+    while font.getlength(label) > (x1 - x0) and size > 24:
+        size -= 2
+        font = _anton_font(size)
+    w = font.getlength(label)
+    cx = x0 + (x1 - x0 - w) / 2
+    cy = y0 + (y1 - y0) / 2
+    # approximate vertical centre via ascent
+    asc, desc = font.getmetrics()
+    ty = cy - (asc + desc) / 2
+    draw.text((cx, ty), label, font=font, fill=color)
+
+
+# --------------------------------------------------------------------------
+# Public builders
+# --------------------------------------------------------------------------
 def make_match_card(fx, kickoff_label, out_name):
     """
-    Build the VS card. fx provides home/home_crest/away/away_crest.
-    Returns the saved file path.
+    Build the VS card from the PSD template. fx provides
+    home/home_crest/away/away_crest (+ _id). Returns the saved file path.
     """
     os.makedirs(IMAGE_DIR, exist_ok=True)
-
-    img = Image.new("RGB", (W, H), DARK)
-    draw = ImageDraw.Draw(img)
-    canvas = img
-
-    # Header band
-    draw.rectangle([0, 0, W, 150], fill=ACCENT)
-    font_logo = _find_font(64, bold=True)
-    lw = draw.textlength("WEEKENDPULSE", font=font_logo)
-    draw.text(((W - lw) / 2, 30), "WEEKENDPULSE", fill=DARK, font=font_logo)
-    font_sub = _find_font(40, bold=True)
-    sw = draw.textlength("TONIGHT", font=font_sub)
-    draw.text(((W - sw) / 2, 104), "TONIGHT", fill=DARK, font=font_sub)
-
-    # Load crests
-    home_crest = _load_crest(fx.get("home_crest"))
-    away_crest = _load_crest(fx.get("away_crest"))
-
-    # Center bands
-    top_cy = 520
-    bottom_cy = 1040
-    size = 230
-
-    # Home band (top): home crest + name
-    hc = _team_color(fx.get("home"))
-    draw.rectangle([0, 300, W, top_cy - 40], fill=_shade(hc))
-    _paste_crest_padded(canvas, draw, home_crest, W // 2, top_cy, size,
-                        fx.get("home") or fx.get("home_tla") or "HOME", canvas)
-
-    # Away band (bottom): away crest + name
-    ac = _team_color(fx.get("away"))
-    draw.rectangle([0, bottom_cy - 60, W, H - 260], fill=_shade(ac))
-    _paste_crest_padded(canvas, draw, away_crest, W // 2, bottom_cy, size,
-                        fx.get("away") or fx.get("away_tla") or "AWAY", canvas)
-
-    # Center "VS"
-    font_vs = _find_font(96, bold=True)
-    vw = draw.textlength("VS", font=font_vs)
-    draw.text(((W - vw) / 2, 720), "VS", fill=ACCENT, font=font_vs)
-
-    # Kickoff line at the bottom
-    font_ko = _find_font(48, bold=True)
-    ko_text = kickoff_label or "KICKOFF TONIGHT"
-    kw = draw.textlength(ko_text, font=font_ko)
-    draw.text(((W - kw) / 2, H - 160), ko_text, fill=WHITE, font=font_ko)
-
+    if not out_name.endswith(".png"):
+        out_name += ".png"
     out_path = os.path.join(IMAGE_DIR, out_name)
-    img.save(out_path, "PNG")
+
+    canvas, slots = _load_template()
+    if canvas is not None and slots:
+        _build_from_template(canvas, slots, fx, kickoff_label, out_path)
+        return out_path
+
+    # Fallback: simple generated card (never crash)
+    _build_fallback(fx, kickoff_label, out_path)
     return out_path
 
 
-def _shade(hex_color):
-    """Return a darkened version of a hex color for a band."""
-    r = int(hex_color[1:3], 16)
-    g = int(hex_color[3:5], 16)
-    b = int(hex_color[5:7], 16)
-    return (r // 2, g // 2, b // 2)
+def _build_from_template(canvas, slots, fx, kickoff_label, out_path):
+    # paste crests
+    _paste_crest_contain(canvas, _load_crest_image(fx, "home"), slots.get("home"))
+    _paste_crest_contain(canvas, _load_crest_image(fx, "away"), slots.get("away"))
+    # kickoff text
+    _draw_kickoff(canvas, kickoff_label, slots.get("kickoff"))
+    canvas.convert("RGB").save(out_path, "PNG")
 
 
-# local team colors (avoid cycle)
-_TEAM_COLORS = {
-    "arsenal": "#EF0107",
-    "chelsea": "#034694",
-    "liverpool": "#C8102E",
-    "man city": "#6CABDD",
-    "manchester city": "#6CABDD",
-    "man united": "#DA291C",
-    "manchester united": "#DA291C",
-    "tottenham": "#132257",
-    "newcastle": "#241F20",
-    "aston villa": "#670E36",
-    "west ham": "#7A263A",
-    "brighton": "#0057B8",
-    "everton": "#003399",
-    "fulham": "#000000",
-    "brentford": "#E30613",
-    "crystal palace": "#1B458F",
-    "wolves": "#FDB913",
-    "bournemouth": "#DA291C",
-    "nottingham": "#DD0000",
-    "leicester": "#003090",
-    "southampton": "#D71920",
-}
+def _build_fallback(fx, kickoff_label, out_path):
+    """Basic non-blocking fallback card (previous layout) if template is missing."""
+    img = Image.new("RGBA", (W, H), DARK)
+    draw = ImageDraw.Draw(img)
+    from image_gen import _find_font
+    font_logo = _find_font(64, bold=True)
+    lw = draw.textlength("WEEKENDPULSE", font=font_logo)
+    draw.text(((W - lw) / 2, 30), "WEEKENDPULSE", fill=WHITE, font=font_logo)
+    _paste_crest_contain(img, _load_crest_image(fx, "home"), (389, 320, 691, 622))
+    _paste_crest_contain(img, _load_crest_image(fx, "away"), (389, 728, 691, 1030))
+    _draw_kickoff(img, kickoff_label, (224, 1136, 857, 1289))
+    img.save(out_path, "PNG")

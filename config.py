@@ -4,6 +4,8 @@ All secrets come from environment variables at runtime (never hardcoded).
 """
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # --- Facebook ---
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID", "1256418564223752")
 FB_PAGE_TOKEN = os.environ.get("FB_PAGE_TOKEN", "")
@@ -68,8 +70,16 @@ FOOTBALL_COMPETITION = os.environ.get("FOOTBALL_COMPETITION", "PL")
 MATCH_POST_HOURS_BEFORE = int(os.environ.get("MATCH_POST_HOURS_BEFORE", "5"))
 MATCH_POST_MAX_PER_DAY = int(os.environ.get("MATCH_POST_MAX_PER_DAY", "10"))
 
+# --- Match card template (user-designed PSD) + local crests ---
+MATCH_TEMPLATE_PSD = os.environ.get(
+    "MATCH_TEMPLATE_PSD", os.path.join(BASE_DIR, "MATCH_TEMPLATE_PSD.psd"))
+LOGOS_DIR = os.environ.get("LOGOS_DIR", os.path.join(BASE_DIR, "logos", "PL"))
+FONT_ANTON = os.path.join(BASE_DIR, "data", "fonts", "Anton-Regular.ttf")
+# Kickoff text styling on the match card (Anton, all-caps)
+MATCH_KICKOFF_FONT_SIZE = int(os.environ.get("MATCH_KICKOFF_FONT_SIZE", "96"))
+MATCH_KICKOFF_COLOR = os.environ.get("MATCH_KICKOFF_COLOR", "#FFFFFF")
+
 # --- Paths ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "weekendpulse.db")
 MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
 PROMPT_PATH = os.path.join(BASE_DIR, "prompts", "debate_post.txt")

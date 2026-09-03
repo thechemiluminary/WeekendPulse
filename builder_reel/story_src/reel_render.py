@@ -274,6 +274,21 @@ def _download_image(url, dest):
 def _find_font(px):
     import os
     from PIL import ImageFont
+    # Prefer the brand "Anton" font (all-caps titles). It may live in the repo
+    # data/fonts or be dropped into the Colab working dir.
+    candidates = [
+        "/content/weekendpulse_reels/Anton-Regular.ttf",
+        "/content/Anton-Regular.ttf",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "Anton-Regular.ttf"),
+        "Anton-Regular.ttf",
+    ]
+    for cand in candidates:
+        if os.path.exists(cand):
+            try:
+                return ImageFont.truetype(cand, px)
+            except Exception:
+                pass
+    # Fallback: DejaVuSans bold
     for cand in ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
                  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]:
         if os.path.exists(cand):
@@ -306,7 +321,7 @@ def _make_title_card(title, out_img):
     d = ImageDraw.Draw(img)
     d.rectangle([0, OUT_H - 600, OUT_W, OUT_H - 180], fill="#FF6B00")
     font = _find_font(76)
-    lines = _wrap(title or "WeekendPulse", font, OUT_W - 160)
+    lines = _wrap((title or "WeekendPulse").upper(), font, OUT_W - 160)
     text = "\n".join(lines[:3])
     d.multiline_text(
         (OUT_W // 2, OUT_H - 390), text,

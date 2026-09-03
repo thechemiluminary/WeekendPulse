@@ -76,4 +76,15 @@ if outro_src.exists() and outro_src.stat().st_size > 1000:
 else:
     print("WARN outro.mp4 missing — reels will render without the outro clip")
 
+# 4. Anton font (brand, all-caps titles) ###################################
+anton_src = A / "Anton-Regular.ttf"
+if not anton_src.exists() or anton_src.stat().st_size < 1000:
+    dl(f"{RAW}/{REPO}/main/data/fonts/Anton-Regular.ttf", anton_src)
+# copy to REEL_ROOT so reel_render._find_font picks it up
+if anton_src.exists() and anton_src.stat().st_size > 1000:
+    shutil.copy(anton_src, REEL_ROOT / "Anton-Regular.ttf")
+    print("Anton font ready:", anton_src.stat().st_size // 1024, "KiB")
+else:
+    print("WARN Anton font missing — reel titles will use DejaVuSans fallback")
+
 print("\nAssets ready. Review reels_batch.txt before rendering.")
