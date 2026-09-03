@@ -47,8 +47,12 @@ def _generate_with_groq(prompt):
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.8,
         # generous budget: reasoning-capable GPT-OSS models spend tokens on
-        # internal reasoning before the real answer; too low and content is empty
-        "max_tokens": 1200,
+        # internal reasoning before the real answer; too low and the JSON gets
+        # truncated mid-output (which previously caused raw JSON to be posted).
+        "max_tokens": 2500,
+        # JSON mode: guarantees a well-formed JSON object, sharply reducing
+        # parse failures and truncated/corrupt output on the live page.
+        "response_format": {"type": "json_object"},
     }
     r = requests.post(url, json=payload, headers=headers, timeout=90)
     r.raise_for_status()
@@ -110,70 +114,86 @@ def _parse_json_result(text):
     return None
 
 
+def _generate_once(prompt):
+    """Try Gemini then Groq for the RAW model output. Returns (raw, provider) or (None, None)."""
+    if GEMINI_API_KEY:
+        try:
+            raw = _generate_with_gemini(prompt)
+            if raw:
+                return raw, "gemini"
+        except Exception as e:
+            print(f"[ai] Gemini failed: {e}")
+    if GROQ_API_KEY:
+        try:
+            raw = _generate_with_groq(prompt)
+            if raw:
+                return raw, "groq"
+        except Exception as e:
+            print(f"[ai] Groq failed: {e}")
+    return None, None
+
+
+def _looks_like_json(text):
+    """True if text still looks like a raw JSON object (never post this as a caption)."""
+    t = (text or "").strip()
+    if not t:
+        return False
+    if t.startswith("{") or (t.startswith("\"") and "\"post_text\"" in t):
+        return True
+    head = t[:60].lower()
+    return "\"post_text\"" in t or ("\"reel_worthy\"" in t)
+
+
 def turn_article_into_post_json(title, summary):
     """
     Generate a Facebook post AND a reel verdict from an article.
     Returns a dict: {post_text, reel_worthy, reel_emotion, reel_blurb, provider}.
-    This path NEVER blocks posting: if JSON parse fails or post_text is missing,
-    it falls back to treating the raw model output as the post text, with
-    reel_worthy=False, reel_emotion="neutral", reel_blurb="" (identical to the
-    legacy text-only behaviour).
+    Robustness: if JSON parsing fails or post_text is missing, the request is
+    RETRIED up to _MAX_ATTEMPTS times (fresh generation each time). If still
+    invalid, the article is SKIPPED (raises RuntimeError) rather than posting
+    raw/truncated model output - the page never publishes garbage JSON.
     """
     prompt = _prompt_for(title, summary)
 
-    def default_out(text, provider):
-        return {
-            "post_text": (text or "").strip(),
-            "reel_worthy": False,
-            "reel_emotion": "neutral",
-            "reel_blurb": "",
-            "provider": provider,
-        }
+    _MAX_ATTEMPTS = 3
 
-    raw = None
-    provider = None
-    if GEMINI_API_KEY:
-        try:
-            raw = _generate_with_gemini(prompt)
-            provider = "gemini"
-        except Exception as e:
-            print(f"[ai] Gemini failed: {e}")
-    if not raw and GROQ_API_KEY:
-        try:
-            raw = _generate_with_groq(prompt)
-            provider = "groq"
-        except Exception as e:
-            print(f"[ai] Groq failed: {e}")
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        raw, provider = _generate_once(prompt)
+        if not raw:
+            raise RuntimeError("Both Gemini and Groq failed - cannot generate post.")
 
-    if not raw:
-        raise RuntimeError("Both Gemini and Groq failed - cannot generate post.")
+        data = _parse_json_result(raw)
+        post_text = ""
+        if data is not None:
+            post_text = (data.get("post_text") or "").strip()
 
-    data = _parse_json_result(raw)
-    if data is None:
-        print("[ai] could not parse JSON - falling back to text-only post")
-        return default_out(raw, provider)
+        text_fine = bool(post_text) and not _looks_like_json(post_text)
 
-    post_text = (data.get("post_text") or "").strip()
-    if not post_text:
-        print("[ai] no post_text in JSON - falling back to text-only post")
-        return default_out(raw, provider)
+        if data is not None and text_fine:
+            worthy = bool(data.get("reel_worthy"))
+            emotion = str(data.get("reel_emotion") or "").lower()
+            if emotion not in ("neutral", "excited", "surprised"):
+                emotion = "neutral"
+            blurb = (data.get("reel_blurb") or "").strip()
+            if not worthy:
+                blurb = ""
+                emotion = "neutral"
+            return {
+                "post_text": post_text,
+                "reel_worthy": worthy,
+                "reel_emotion": emotion,
+                "reel_blurb": blurb,
+                "provider": provider,
+            }
 
-    worthy = bool(data.get("reel_worthy"))
-    emotion = str(data.get("reel_emotion") or "").lower()
-    if emotion not in ("neutral", "excited", "surprised"):
-        emotion = "neutral"
-    blurb = (data.get("reel_blurb") or "").strip()
-    if not worthy:
-        blurb = ""
-        emotion = "neutral"
+        reason = "could not parse JSON" if data is None else (
+            "no usable post_text" if not post_text else "post_text looks like raw JSON")
+        print(f"[ai] attempt {attempt}/{_MAX_ATTEMPTS}: {reason} - regenerating")
 
-    return {
-        "post_text": post_text,
-        "reel_worthy": worthy,
-        "reel_emotion": emotion,
-        "reel_blurb": blurb,
-        "provider": provider,
-    }
+    # All retries failed -> SKIP this article (never post raw/truncated output).
+    raise RuntimeError(
+        f"After {_MAX_ATTEMPTS} attempts the AI produced no valid post text - "
+        "skipping article to avoid posting malformed JSON.")
 
 
 def turn_article_into_post(title, summary):

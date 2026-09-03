@@ -19,7 +19,7 @@ from db import init_db, get_conn, mark_posted as _mark_posted
 from ai_processor import turn_article_into_post_json, turn_fixture_into_post
 from publisher import post_text, post_text_with_image_url, schedule_post, sanitize_text
 import manifest
-from manifest import append_post_entry, posted_titles
+from manifest import append_post_entry, posted_titles, recent_topic_fingerprints
 import fixtures as fixtures_mod
 
 
@@ -34,7 +34,13 @@ def _publish_one(article, conn, include_image=True):
         print("[main]   DRY_RUN - skipping AI + publish")
         return {"status": "dry_run", "article": title}
 
-    post_result = turn_article_into_post_json(title, summary)
+    try:
+        post_result = turn_article_into_post_json(title, summary)
+    except RuntimeError as e:
+        # AI produced no valid post text (even after retries) - skip this
+        # article rather than posting raw/truncated JSON or crashing the batch.
+        print(f"[main]   SKIP ({e})")
+        return {"status": "skipped", "article": title}
     post = post_result["post_text"]
     provider = post_result["provider"]
     reel_meta = {
@@ -98,7 +104,7 @@ def run(include_image=True):
         if not remaining:
             break
 
-        article = select_postable(conn, remaining, posted_titles())
+        article = select_postable(conn, remaining, posted_titles(), recent_topic_fingerprints())
         if article is None:
             print(f"[main] no more postable articles after {i} posts")
             break
@@ -110,6 +116,9 @@ def run(include_image=True):
         if res["status"] == "posted":
             titles_done.append(article["title"])
             # Remove the posted article from remaining so next iteration skips it
+            remaining = [r for r in remaining if (r["url"] if "url" in r.keys() else None) != (article["url"] if "url" in article.keys() else None)]
+        elif res["status"] == "skipped":
+            # AI produced no valid post text - drop this article and try the next
             remaining = [r for r in remaining if (r["url"] if "url" in r.keys() else None) != (article["url"] if "url" in article.keys() else None)]
         elif res["status"] == "error":
             # Don't retry on publish failure

@@ -3,6 +3,14 @@ name: WeekendPulse Deploy
 on:
   workflow_dispatch:        # triggered by cron-job.org + manual testing
 
+# Only ONE post.yml run executes at a time. Two overlapping/back-to-back runs
+# (e.g. hourly cron + a manual dispatch) previously could both scrape the same
+# just-published story and both post it -> duplicated posts. GitHub cancels any
+# in-progress run or queues it behind this one.
+concurrency:
+  group: post-pipeline
+  cancel-in-progress: true
+
 jobs:
   post:
     runs-on: ubuntu-latest

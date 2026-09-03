@@ -465,6 +465,72 @@ NEXT:
 [ ] Manual: user adds image to the draft in Telegram and posts to the FB page.
 
 =====================================================================
+PHASE 3f - BUGFIX: DUPLICATED + RAW-JSON NEWS POSTS (main pipeline)
+=====================================================================
+BUG REPORT (2026-09-03, user): the main NEWS pipeline posted one David Luiz
+story TWICE on Facebook, and BOTH copies came out with RAW/TRUNCATED JSON as the
+caption (e.g. `{"post_text":"...David Luiz's Chelsea comeback ends in 2019..."
+and `{\n "post_text": "...David Luiz throws Lampard a reality check..."`).
+User confirmed: it is ONE story posted twice (duplication + malformed = same event).
+User wants: keep the news bot FULLY AUTOMATED, just fix the bugs (fix both A+B).
+
+ROOT CAUSES (confirmed):
+- (A) Truncated JSON from Groq being posted as raw garbage:
+    ai_processor.py used max_tokens=1200 on openai/gpt-oss-20b (a REASONING
+    model). Reasoning eats the token budget -> the JSON object gets CUT OFF
+    mid-way (observed `"reel_bl` with no closing brace). _parse_json_result()
+    needs a balanced closing `}` so it returned None -> the old "safe fallback"
+    default_out(raw) POSTED THE RAW MODEL OUTPUT as the caption. Garbage on
+    the live page.
+- (B) Cross-run duplication:
+    data/weekendpulse.db is GITIGNORED + never persisted -> every GitHub run
+    starts with an EMPTY DB -> cross-run dedup relies 100% on the committed
+    manifest.json. Two overlapping/back-to-back runs both scrape the same
+    newly-published story (empty DB = "new"), both fuzzy-check against the same
+    pre-commit manifest, and both post it. Evidence: local DB shows the David
+    Luiz article `posted=0` even though manifest records it as posted.
+    Also: no concurrency lock meant two post.yml runs could overlap.
+
+FIX PLAN (locked via user Q&A - Fix both A+B, concurrency-lock + fingerprint):
+- (A) ai_processor.py:
+    [ x ] max_tokens raised 1200 -> 2500 (Gpt-OSS reasoning budget)
+    [ x ] Groq request now uses JSON mode: response_format={"type":"json_object"}
+    [ x ] Added _generate_once() (Gemini then Groq, returns raw+provider)
+    [ x ] Added _looks_like_json() guard (reject caption that still looks raw)
+    [ x ] turn_article_into_post_json now RETRIES up to 3 attempts on
+          parse/post_text/raw-JSON failure, then raises RuntimeError (SKIP the
+          article) instead of posting raw output
+    [ x ] main.py _publish_one catches RuntimeError -> returns status "skipped"
+    [ x ] main.py run() handles "skipped" -> removes article, CONTINUES to next
+          (previously any non-posted/non-error status broke the batch)
+- (B) dedup:
+    [ x ] manifest.py: topic_fp (normalized sorted proper-noun entity set from
+          title) added to _empty_entry + append_post_entry; recent_topic_fingerprints()
+          reader returns the last N fingerprints (most-recent first)
+    [ x ] scraper.py: topic_fp() computes the normalized sorted entity fingerprint
+          per title; select_postable() takes recent_fingerprints and SKIPS any fresh
+          row whose entity-set fingerprint already appears (exact match, stricter
+          than fuzzy ratio) - cross-run, cross-source same-story protection
+    [ x ] main.py: imports recent_topic_fingerprints + passes it into select_postable
+    [ x ] post.yml: `concurrency: group post-pipeline, cancel-in-progress: true`
+          added so only ONE post.yml run executes at a time (kills overlap race)
+
+STATUS: (A) + (B) code edits DONE AND VERIFIED locally.
+VERIFIED (2026-09-03):
+    - py_compile ALL OK (ai_processor, main, manifest, scraper).
+    - David Luiz variants: story_similar() catches both (shared David+Luiz names);
+      fingerprint guard confirmed to skip a fresh row matching a recent fingerprint
+      and pick a different, genuinely-distinct story.
+    - Forced truncated-JSON generation -> turn_article_into_post_json raises
+      RuntimeError after 3 retries -> article SKIPPED (no raw dump).
+    - post_text that itself looks like JSON -> also SKIPPED (rejected, not posted).
+    - Clean JSON contract still returns {post_text, reel_worthy, reel_emotion,
+      reel_blurb, provider} correctly.
+NEXT SESSION:
+    [ ] Commit + push (A+B+concurrency), then workflow_dispatch on post.yml to
+        confirm no dup + no garbage on the live page.
+
+=====================================================================
 PHASE 4 - MONITORING & REFINEMENT
 =====================================================================
 [   ] Week 1: check engagement (likes/comments/shares) on posts

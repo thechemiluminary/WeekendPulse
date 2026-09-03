@@ -68,6 +68,17 @@ def key_names(title):
     return names - _NON_ENTITY_NAMES
 
 
+def topic_fp(title):
+    """
+    Stable per-story fingerprint: sorted, normalized proper-noun entity set from
+    the title. Two different magazines covering one story produce (near-)equal
+    fingerprints, letting us dedup across runs/sources by exact string equality
+    (much stricter than fuzzy ratio - only real same-entity stories collapse).
+    """
+    names = key_names(title)
+    return " ".join(sorted(n.lower() for n in names))
+
+
 def story_similar(title_a, title_b, threshold=None):
     """
     Fuzzy story match: do two headlines describe the SAME story?
@@ -260,16 +271,20 @@ def _backfill_image(conn, url, image_url):
     conn.commit()
 
 
-def select_postable(conn, fresh_rows, posted_titles):
+def select_postable(conn, fresh_rows, posted_titles, recent_fingerprints=None):
     """
     Returns the FIRST fresh article that should be posted, or None.
     Skips rows that:
       - are already in the durable post log by URL/exact match, OR
       - fuzzily match an already-posted story (same story, different magazine), OR
+      - share a recent topic fingerprint (normalized entity set) with an already
+        posted story (cross-run, same story from a different source), OR
       - fuzzily match ANOTHER article in this same fresh batch (so we never post
         two magazines covering one story in a single run).
     Returns a DB row (dict-like) eligible to post, or None if everything is a dup.
     """
+    recent_fingerprints = set(recent_fingerprints or [])
+
     # Exact-URL guard first: never repost a URL already in the log.
     fresh = []
     for row in fresh_rows:
@@ -278,11 +293,16 @@ def select_postable(conn, fresh_rows, posted_titles):
             continue
         fresh.append(row)
 
-    # Fuzzy guard against already-posted stories (cross-run, cross-source).
+    # Fuzzy + fingerprint guard against already-posted stories (cross-run,
+    # cross-source). The fingerprint (exact entity-set match) is stricter than
+    # fuzzy title ratio and is the primary cross-run same-story check.
     kept = []
     for row in fresh:
         title = row["title"] if "title" in row.keys() else ""
         if similar_to_any(title, posted_titles):
+            continue
+        fp = topic_fp(title)
+        if recent_fingerprints and fp and fp in recent_fingerprints:
             continue
         kept.append(row)
 
@@ -298,6 +318,6 @@ def select_postable(conn, fresh_rows, posted_titles):
         break
 
     print(f"[scraper] select_postable: {len(fresh_rows)} fresh -> "
-          f"{len(fresh)} after URL-dedup -> {len(kept)} after fuzzy-dedup -> "
+          f"{len(fresh)} after URL-dedup -> {len(kept)} after fuzzy+fingerprint-dedup -> "
           f"{'picked: ' + (chosen['title'][:60] if chosen else 'NONE')}")
     return chosen

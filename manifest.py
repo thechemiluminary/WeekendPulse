@@ -11,11 +11,23 @@ update it safely across runs.
 """
 import json
 import os
+import re
 from datetime import datetime, timezone
 
 from config import BASE_DIR
 
 MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
+
+
+def _topic_fingerprint(title):
+    """
+    Compute a stable fingerprint from a title: the sorted, normalized set of
+    proper-noun-ish tokens (player/club names). This is used for cross-run
+    deduplication of the same story from different sources.
+    """
+    from scraper import key_names
+    names = key_names(title)
+    return " ".join(sorted(name.lower() for name in names))
 
 
 def _slug_for(url, title):
@@ -39,6 +51,7 @@ def _empty_entry(slug):
         "description": "",
         "url": "",
         "image_url": "",
+        "topic_fp": "",
         "reel_approved": False,
         "reel_emotion": "neutral",
         "reel_blurb": "",
@@ -93,17 +106,20 @@ def upsert(entry):
     return save_manifest(entries)
 
 
-def append_post_entry(post_id, article_row, reel_meta=None):
+def append_post_entry(post_id, article_row, reel_meta=None, topic_fp=None):
     """
     Record a post that was pushed to the Page. article_row: dict-like with
     id/url/title/source/image_url. reel_meta: optional dict with
-    reel_worthy/reel_emotion/reel_blurb.
+    reel_worthy/reel_emotion/reel_blurb. topic_fp: an optional precomputed
+    story fingerprint (blank -> computed here from the title).
     """
     reel_meta = reel_meta or {}
     worthy = bool(reel_meta.get("reel_worthy"))
     title = article_row["title"] if "title" in article_row.keys() else ""
     url = article_row["url"] if "url" in article_row.keys() else ""
     image_url = article_row["image_url"] if "image_url" in article_row.keys() else ""
+    if not topic_fp:
+        topic_fp = _topic_fingerprint(title)
     entry = {
         "posted_at_utc": datetime.now(timezone.utc).isoformat(),
         "post_id": post_id or "",
@@ -111,6 +127,7 @@ def append_post_entry(post_id, article_row, reel_meta=None):
         "description": (article_row["title"] if "title" in article_row.keys() else "") or "",
         "url": url or "",
         "image_url": image_url or "",
+        "topic_fp": topic_fp or "",
         "reel_approved": worthy,
         "reel_emotion": reel_meta.get("reel_emotion", "neutral") if worthy else "neutral",
         "reel_blurb": reel_meta.get("reel_blurb", "") if worthy else "",
@@ -141,6 +158,20 @@ def already_posted(url):
 def posted_titles():
     """Titles of every story already sent to the Page (for story-level dedup)."""
     return [row.get("title", "") or "" for row in load_manifest()]
+
+
+def recent_topic_fingerprints(max_entries=100):
+    """
+    Story fingerprints of recent posts, most-recent first. Used for cross-run
+    dedup of the SAME story scraped from multiple sources (the DB is gitignored
+    and each GitHub run starts empty, so the committed manifest is the durable
+    cross-run record).
+    """
+    return [
+        (e.get("topic_fp") or "")
+        for e in reversed(load_manifest())
+        if e.get("topic_fp")
+    ][:max_entries]
 
 
 def reel_pending():
