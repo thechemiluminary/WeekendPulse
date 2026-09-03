@@ -11,6 +11,22 @@ GRAPH = "https://graph.facebook.com/v26.0"
 _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) WeekendPulse bot/1.0"
 
 
+def sanitize_text(text):
+    """
+    Normalize text so it is always valid UTF-8 for the Graph upload encoding.
+    AI/"template" output can contain surrogate code points (lone or pairs) that
+    str.encode('utf-8') rejects by default ('surrogates not allowed').
+    A UTF-16 round-trip (with surrogatepass) combines valid high+low surrogate
+    pairs back into a single astral character and replaces any stray lone
+    surrogate with a safe char - giving clean, encodable UTF-8 text.
+    """
+    if not isinstance(text, str):
+        return text
+    return text.encode(
+        "utf-16", errors="surrogatepass"
+    ).decode("utf-16", errors="replace")
+
+
 def _headers():
     if not FB_PAGE_TOKEN:
         raise RuntimeError("FB_PAGE_TOKEN not set - cannot publish.")
@@ -21,6 +37,7 @@ def post_text(message):
     """
     Publish a text post to the Page. Returns (ok, post_id_or_error).
     """
+    message = sanitize_text(message)
     url = f"{GRAPH}/{FB_PAGE_ID}/feed"
     resp = requests.post(url, json={"message": message}, headers=_headers(), timeout=60)
     data = resp.json()
@@ -61,7 +78,7 @@ def post_text_with_image_url(message, image_url, save_dir=IMAGE_DIR):
 
     url = f"{GRAPH}/{FB_PAGE_ID}/photos"
     files = {"source": content}  # send raw bytes
-    data = {"message": message}
+    data = {"message": sanitize_text(message)}
     head = _headers()
     resp = requests.post(url, data=data, files=files, headers=head, timeout=120)
     j = resp.json()
@@ -78,7 +95,7 @@ def post_text_with_image(message, image_path):
         content = f.read()
     url = f"{GRAPH}/{FB_PAGE_ID}/photos"
     files = {"source": content}
-    data = {"message": message}
+    data = {"message": sanitize_text(message)}
     head = _headers()
     resp = requests.post(url, data=data, files=files, headers=head, timeout=120)
     j = resp.json()
@@ -104,7 +121,7 @@ def schedule_post(message, image_path, scheduled_unix):
     url = f"{GRAPH}/{FB_PAGE_ID}/photos"
     files = {"source": content}
     data = {
-        "message": message,
+        "message": sanitize_text(message),
         "published": "false",
         "scheduled_publish_time": str(int(scheduled_unix)),
     }
