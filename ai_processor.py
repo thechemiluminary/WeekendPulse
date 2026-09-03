@@ -8,6 +8,8 @@ import json
 
 from config import (
     GEMINI_API_KEY, GROQ_API_KEY, GROQ_MODEL, GEMINI_MODEL, PROMPT_PATH, MATCH_PROMPT_PATH,
+    CEREBRAS_API_KEY, CEREBRAS_BASE_URL, CEREBRAS_MODEL,
+    NIM_API_KEY, NIM_BASE_URL, NIM_MODEL,
 )
 
 
@@ -63,6 +65,50 @@ def _generate_with_groq(prompt):
     return content
 
 
+def _generate_with_openai_compat(prompt, api_key, base_url, model, label):
+    """
+    Generic OpenAI-compatible chat completion caller (used by Cerebras + NVIDIA
+    NIM). Returns clean text. Raises on HTTP/empty/parse errors so the caller's
+    fallback chain can move on to the next provider.
+    """
+    import requests
+
+    url = f"{base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.8,
+        # generous budget + JSON mode: reasoning-capable GPT-OSS models spend
+        # tokens on internal reasoning; too low and the JSON gets truncated.
+        "max_tokens": 2500,
+        "response_format": {"type": "json_object"},
+    }
+    r = requests.post(url, json=payload, headers=headers, timeout=120)
+    r.raise_for_status()
+    body = r.json()
+    choices = body.get("choices") or []
+    if not choices:
+        raise RuntimeError(f"{label} returned no choices")
+    content = (choices[0].get("message") or {}).get("content", "").strip()
+    if not content:
+        raise RuntimeError(f"{label} returned empty content")
+    return content
+
+
+def _generate_with_cerebras(prompt):
+    return _generate_with_openai_compat(prompt, CEREBRAS_API_KEY, CEREBRAS_BASE_URL,
+                                        CEREBRAS_MODEL, "Cerebras")
+
+
+def _generate_with_nim(prompt):
+    return _generate_with_openai_compat(prompt, NIM_API_KEY, NIM_BASE_URL,
+                                        NIM_MODEL, "NIM")
+
+
 def _prompt_for(title, summary):
     template = _load_prompt_template()
     return template.replace("{title}", title).replace("{summary}", summary or "")
@@ -115,7 +161,7 @@ def _parse_json_result(text):
 
 
 def _generate_once(prompt):
-    """Try Gemini then Groq for the RAW model output. Returns (raw, provider) or (None, None)."""
+    """Try Gemini then Groq then Cerebras then NIM for RAW output. Returns (raw, provider) or (None, None)."""
     if GEMINI_API_KEY:
         try:
             raw = _generate_with_gemini(prompt)
@@ -130,6 +176,20 @@ def _generate_once(prompt):
                 return raw, "groq"
         except Exception as e:
             print(f"[ai] Groq failed: {e}")
+    if CEREBRAS_API_KEY:
+        try:
+            raw = _generate_with_cerebras(prompt)
+            if raw:
+                return raw, "cerebras"
+        except Exception as e:
+            print(f"[ai] Cerebras failed: {e}")
+    if NIM_API_KEY:
+        try:
+            raw = _generate_with_nim(prompt)
+            if raw:
+                return raw, "nim"
+        except Exception as e:
+            print(f"[ai] NIM failed: {e}")
     return None, None
 
 
@@ -160,7 +220,7 @@ def turn_article_into_post_json(title, summary):
     for attempt in range(1, _MAX_ATTEMPTS + 1):
         raw, provider = _generate_once(prompt)
         if not raw:
-            raise RuntimeError("Both Gemini and Groq failed - cannot generate post.")
+            raise RuntimeError("All AI providers failed (Gemini/Groq/Cerebras/NIM) - cannot generate post.")
 
         data = _parse_json_result(raw)
         post_text = ""
@@ -235,6 +295,18 @@ def turn_fixture_into_post(home, away, venue, matchday, kickoff_local):
             provider = "groq"
         except Exception as e:
             print(f"[ai] Groq failed (fixture): {e}")
+    if not raw and CEREBRAS_API_KEY:
+        try:
+            raw = _generate_with_cerebras(prompt)
+            provider = "cerebras"
+        except Exception as e:
+            print(f"[ai] Cerebras failed (fixture): {e}")
+    if not raw and NIM_API_KEY:
+        try:
+            raw = _generate_with_nim(prompt)
+            provider = "nim"
+        except Exception as e:
+            print(f"[ai] NIM failed (fixture): {e}")
 
     if raw:
         data = _parse_json_result(raw)

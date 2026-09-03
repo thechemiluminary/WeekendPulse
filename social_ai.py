@@ -3,10 +3,10 @@ WeekendPulse - Social engagement AI core.
 Generates N self-scored engagement candidates from the pooled talking points
 and picks the best above threshold.
 
-Provider chain: OPENROUTER -> GROQ (all OpenAI-compatible, text-only). Groq
-uses multi-API-key rotation (GROQ_API_KEY, _2, _3) so a rate-limited/dead key
-fails over to the next. No Google Search Grounding, so no real web image URLs -
-social posts are text-only.
+Provider chain: OPENROUTER -> GROQ (multi-key rotation) -> CEREBRAS -> NIM
+(all OpenAI-compatible, text-only). Groq uses multi-API-key rotation
+(GROQ_API_KEY, _2, _3) so a rate-limited/dead key fails over to the next. No
+Google Search Grounding, so no real web image URLs - social posts are text-only.
 """
 import json
 import os
@@ -28,6 +28,10 @@ def _provider_key_and_model():
         return config.OPENROUTER_API_KEY, config.OPENROUTER_MODEL
     if config.GROQ_API_KEY:
         return config.GROQ_API_KEY, config.GROQ_MODEL
+    if config.CEREBRAS_API_KEY:
+        return config.CEREBRAS_API_KEY, config.CEREBRAS_MODEL
+    if config.NIM_API_KEY:
+        return config.NIM_API_KEY, config.NIM_MODEL
     return None, None
 
 
@@ -125,6 +129,45 @@ def _openrouter_generate_candidates(prompt):
     return content, []
 
 
+def _openai_compat_generate_candidates(prompt, api_key, base_url, model, label):
+    """Generic OpenAI-compatible caller for Cerebras + NVIDIA NIM.
+    Returns (raw_text, []) - text-only."""
+    import requests
+    url = f"{base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.8,
+        "max_tokens": 2500,
+    }
+    r = requests.post(url, json=payload, headers=headers, timeout=120)
+    r.raise_for_status()
+    body = r.json()
+    choices = body.get("choices") or []
+    if not choices:
+        raise RuntimeError(f"{label} returned no choices")
+    content = (choices[0].get("message") or {}).get("content", "").strip()
+    if not content:
+        raise RuntimeError(f"{label} returned empty content")
+    return content, []
+
+
+def _cerebras_generate_candidates(prompt):
+    return _openai_compat_generate_candidates(
+        prompt, config.CEREBRAS_API_KEY, config.CEREBRAS_BASE_URL,
+        config.CEREBRAS_MODEL, "Cerebras")
+
+
+def _nim_generate_candidates(prompt):
+    return _openai_compat_generate_candidates(
+        prompt, config.NIM_API_KEY, config.NIM_BASE_URL,
+        config.NIM_MODEL, "NIM")
+
+
 def _parse_json(text):
     """Parse a JSON object robustly (handles fences + surrounding prose)."""
     if not text:
@@ -205,7 +248,7 @@ def generate_candidates(prompts_n=config.SOCIAL_NUM_CANDIDATES):
     raw = None
     provider = None
     chunks = []
-    if api_key and "groq" not in (model or "").lower() and os.environ.get("_SOCIAL_GROQ_ONLY") != "1":
+    if config.OPENROUTER_API_KEY and os.environ.get("_SOCIAL_GROQ_ONLY") != "1":
         try:
             raw, chunks = _openrouter_generate_candidates(prompt)
             provider = "openrouter"
@@ -220,6 +263,18 @@ def generate_candidates(prompts_n=config.SOCIAL_NUM_CANDIDATES):
                 break
             except Exception as e:
                 print(f"[social_ai] Groq failed (key): {e}")
+    if not raw and config.CEREBRAS_API_KEY:
+        try:
+            raw, chunks = _cerebras_generate_candidates(prompt)
+            provider = "cerebras"
+        except Exception as e:
+            print(f"[social_ai] Cerebras failed: {e}")
+    if not raw and config.NIM_API_KEY:
+        try:
+            raw, chunks = _nim_generate_candidates(prompt)
+            provider = "nim"
+        except Exception as e:
+            print(f"[social_ai] NIM failed: {e}")
 
     if not raw:
         raise RuntimeError("All provider calls failed - cannot generate social post.")

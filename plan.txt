@@ -398,6 +398,42 @@ SOCIAL ENGINE PROVIDER SWITCH TO OPENROUTER (2026-09-03, per user):
 - PENDING USER ACTION: add OPENROUTER_API_KEY to GitHub Actions secrets, then
   run workflow_dispatch on collect.yml to verify cloud end-to-end (text-only).
 
+FALLBACK PROVIDER EXPANSION: CEREBRAS + NVIDIA NIM (2026-09-03, per user):
+- User asked to add "cerebras and github" fallbacks for ALL AI calls. GitHub
+  Models was FULLY RETIRED on 2026-07-30 (official GitHub changelog) -> replaced
+  the GitHub slot with NVIDIA NIM (free OpenAI-compatible endpoint on
+  build.nvidia.com). Cerebras free tier is uncertain (some show a permanent
+  1M tokens/day, official pricing lists a $5 one-time trial credit expiring in
+  30 days) - still worth wiring since it is a SEPARATE quota from Groq/Gemini.
+- Both providers host the gpt-oss-120b model family (same as existing Groq
+  openai/gpt-oss-20b) so output style stays consistent.
+- Final provider chains (all OpenAI-compatible, JSON contract unchanged):
+    * News posts (turn_article_into_post_json / _generate_once):
+          GEMINI -> GROQ -> CEREBRAS -> NIM -> skip (retry x3)
+    * Match previews (turn_fixture_into_post):
+          GEMINI -> GROQ -> CEREBRAS -> NIM -> template fallback
+    * Social engine (social_ai.generate_candidates):
+          OPENROUTER -> GROQ(rotation _1/_2/_3) -> CEREBRAS -> NIM -> error
+- CODE CHANGED:
+    [ x ] config.py: CEREBRAS_API_KEY/BASE_URL(https://api.cerebras.ai/v1)/MODEL
+          (gpt-oss-120b) + NIM_API_KEY/BASE_URL(https://integrate.api.nvidia.com/v1)
+          /MODEL(openai/gpt-oss-120b) - all env-overridable.
+    [ x ] ai_processor.py: _generate_with_openai_compat() generic caller +
+          _generate_with_cerebras/_generate_with_nim (max_tokens 2500 + JSON
+          mode); added Cerebras+NIM rungs to _generate_once + turn_fixture_into_post.
+    [ x ] social_ai.py: _openai_compat_generate_candidates() generic caller +
+          _cerebras_generate_candidates/_nim_generate_candidates; added both to
+          generate_candidates chain + _provider_key_and_model; fixed OpenRouter
+          first-block gate to require OPENROUTER_API_KEY (was keying off model
+          name, so only-fallback configs could waste a call against OpenRouter).
+    [ x ] .github/workflows/post.yml: added CEREBRAS_API_KEY + NIM_API_KEY to
+          BOTH the main-bot step and the match-preview step.
+    [ x ] .github/workflows/collect.yml: added CEREBRAS_API_KEY + NIM_API_KEY.
+    [ ] reel_batch.yml: no change (no AI calls).
+- PENDING USER ACTION: add CEREBRAS_API_KEY (cloud.cerebras.ai) + NIM_API_KEY
+  (build.nvidia.com) to GitHub Actions secrets, then live-verify both providers
+  (model slug gpt-oss-120b / openai/gpt-oss-120b) - mock tests passed locally.
+
 NEXT:
 [ ] USER: add OPENROUTER_API_KEY to GitHub Actions secrets, then workflow_dispatch
     on collect.yml to verify cloud end-to-end (text-only, OpenRouter).

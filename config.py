@@ -29,6 +29,16 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "google/gemini-3.6-flash")
 
+# --- Extra OpenAI-compatible fallback providers (both host gpt-oss-120b) ---
+# Cerebras: free-ish tier, ultra-fast, OpenAI-compatible.
+CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "")
+CEREBRAS_BASE_URL = os.environ.get("CEREBRAS_BASE_URL", "https://api.cerebras.ai/v1")
+CEREBRAS_MODEL = os.environ.get("CEREBRAS_MODEL", "gpt-oss-120b")
+# NVIDIA NIM: free OpenAI-compatible endpoint (replaces the retired GitHub Models).
+NIM_API_KEY = os.environ.get("NIM_API_KEY", "")
+NIM_BASE_URL = os.environ.get("NIM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+NIM_MODEL = os.environ.get("NIM_MODEL", "openai/gpt-oss-120b")
+
 # --- Semi-auto social mode ---
 # When enabled, the social engine does NOT auto-publish to Facebook. Instead it
 # generates a draft and sends it to the user's Telegram bot (TG_BOT_TOKEN ->
