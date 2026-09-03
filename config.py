@@ -13,11 +13,30 @@ FB_PAGE_TOKEN = os.environ.get("FB_PAGE_TOKEN", "")
 # --- AI providers ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+# Extra Groq keys for the social engine's multi-API-key rotation. If one key is
+# rate-limited/errors, the next key is tried. Empty keys are skipped.
+GROQ_API_KEY_2 = os.environ.get("GROQ_API_KEY_2", "")
+GROQ_API_KEY_3 = os.environ.get("GROQ_API_KEY_3", "")
 # Dedicated key for the social engagement engine (user's 2nd account). Falls
 # back to GEMINI_API_KEY then GROQ_API_KEY.
 GEMINI_KEY_SOCIAL = os.environ.get("GEMINI_KEY_SOCIAL", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "models/gemini-3.6-flash")
+# Primary social engine provider: OpenRouter (OpenAI-compatible gateway). It
+# replaces GEMINI_KEY_SOCIAL which was 403-blocked. Images not supported (no
+# Search Grounding) -> social posts are text-only via this path.
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "google/gemini-3.6-flash")
+
+# --- Semi-auto social mode ---
+# When enabled, the social engine does NOT auto-publish to Facebook. Instead it
+# generates a draft and sends it to the user's Telegram bot (TG_BOT_TOKEN ->
+# TG_CHAT_ID) so the user manually adds an image and posts. Drafts are tracked
+# separately and do NOT count toward the SOCIAL_MAX_PER_DAY cap.
+SOCIAL_SEMIAUTO = os.environ.get("SOCIAL_SEMIAUTO", "0") == "1"
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
+TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
 
 # --- RSS feed sources ---
 RSS_FEEDS = [

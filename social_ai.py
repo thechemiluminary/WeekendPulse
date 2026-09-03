@@ -1,10 +1,12 @@
 """
-WeekendPulse - Social engagement AI core (the ONLY Gemini usage in the engine).
-Generates N self-scored engagement candidates from the pooled talking points,
-picks the best above threshold, then fetches a real web image for it via
-Gemini Search Grounding in the SAME request (grounding_chunks -> image_url).
+WeekendPulse - Social engagement AI core.
+Generates N self-scored engagement candidates from the pooled talking points
+and picks the best above threshold.
 
-Provider chain: GEMINI_KEY_SOCIAL -> GEMINI_API_KEY -> GROQ (text-only).
+Provider chain: OPENROUTER -> GROQ (all OpenAI-compatible, text-only). Groq
+uses multi-API-key rotation (GROQ_API_KEY, _2, _3) so a rate-limited/dead key
+fails over to the next. No Google Search Grounding, so no real web image URLs -
+social posts are text-only.
 """
 import json
 import os
@@ -22,13 +24,21 @@ def _load_social_prompt():
 
 def _provider_key_and_model():
     """Pick the best available key. Returns (key, model) or (None, None)."""
-    if config.GEMINI_KEY_SOCIAL:
-        return config.GEMINI_KEY_SOCIAL, config.SOCIAL_EMBED_MODEL
-    if config.GEMINI_API_KEY:
-        return config.GEMINI_API_KEY, config.SOCIAL_EMBED_MODEL
+    if config.OPENROUTER_API_KEY:
+        return config.OPENROUTER_API_KEY, config.OPENROUTER_MODEL
     if config.GROQ_API_KEY:
         return config.GROQ_API_KEY, config.GROQ_MODEL
     return None, None
+
+
+def _groq_keys():
+    """Return all non-empty Groq keys in priority order for rotation."""
+    keys = []
+    for name in ("GROQ_API_KEY", "GROQ_API_KEY_2", "GROQ_API_KEY_3"):
+        v = getattr(config, name, "") or ""
+        if v:
+            keys.append(v)
+    return keys
 
 
 def _gemini_generate_candidates(prompt, api_key, model, grounded):
@@ -68,11 +78,12 @@ def _gemini_generate_candidates(prompt, api_key, model, grounded):
     return text, chunks
 
 
-def _groq_generate_candidates(prompt):
-    """Groq fallback (text-only, no grounding). Returns (raw_text, [])."""
+def _groq_generate_candidates(prompt, api_key):
+    """Groq fallback (text-only, no grounding) via a specific key.
+    Returns (raw_text, [])."""
     import requests
     url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {config.GROQ_API_KEY}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
         "model": config.GROQ_MODEL,
         "messages": [{"role": "user", "content": prompt}],
@@ -84,6 +95,33 @@ def _groq_generate_candidates(prompt):
     content = r.json()["choices"][0]["message"].get("content", "").strip()
     if not content:
         raise RuntimeError("Groq returned empty content")
+    return content, []
+
+
+def _openrouter_generate_candidates(prompt):
+    """Primary social provider via OpenRouter (OpenAI-compatible, text-only).
+    Returns (raw_text, []) - no grounding, so no image URLs here."""
+    import requests
+    url = f"{config.OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": config.OPENROUTER_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.8,
+        "max_tokens": 2500,
+    }
+    r = requests.post(url, json=payload, headers=headers, timeout=120)
+    r.raise_for_status()
+    body = r.json()
+    choices = body.get("choices") or []
+    if not choices:
+        raise RuntimeError("OpenRouter returned no choices")
+    content = (choices[0].get("message") or {}).get("content", "").strip()
+    if not content:
+        raise RuntimeError("OpenRouter returned empty content")
     return content, []
 
 
@@ -169,16 +207,19 @@ def generate_candidates(prompts_n=config.SOCIAL_NUM_CANDIDATES):
     chunks = []
     if api_key and "groq" not in (model or "").lower() and os.environ.get("_SOCIAL_GROQ_ONLY") != "1":
         try:
-            raw, chunks = _gemini_generate_candidates(prompt, api_key, model, config.SOCIAL_GROUNDED)
-            provider = "gemini"
+            raw, chunks = _openrouter_generate_candidates(prompt)
+            provider = "openrouter"
         except Exception as e:
-            print(f"[social_ai] Gemini failed: {e}")
-    if (not raw) and config.GROQ_API_KEY:
-        try:
-            raw, chunks = _groq_generate_candidates(prompt)
-            provider = "groq"
-        except Exception as e:
-            print(f"[social_ai] Groq failed: {e}")
+            print(f"[social_ai] OpenRouter failed: {e}")
+    if not raw:
+        # Groq multi-key rotation: try each key until one succeeds.
+        for key in _groq_keys():
+            try:
+                raw, chunks = _groq_generate_candidates(prompt, key)
+                provider = "groq"
+                break
+            except Exception as e:
+                print(f"[social_ai] Groq failed (key): {e}")
 
     if not raw:
         raise RuntimeError("All provider calls failed - cannot generate social post.")
@@ -307,27 +348,10 @@ def _gemini_image_search(api_key, model, query):
 def find_image_url(generation_chunks, image_query=""):
     """
     Return a trusted image URL for the chosen candidate.
-    Preference: a live grounded image URL captured during generation, else a
-    fresh grounding image search for the candidate. Returns None if unavailable.
+    NOTE: OpenRouter and Groq providers are both text-only (no Google Search
+    Grounding), so no real web image URLs are available. Returns None always,
+    meaning social posts go out text-only via this path.
     """
-    api_key, model = _provider_key_and_model()
-    if not api_key or "groq" in (model or "").lower():
-        return None
-
-    # 1) prefer already-grounded image URLs from the generation call
-    for u in _extract_image_urls(generation_chunks):
-        if _trusted(u):
-            return u
-
-    # 2) fresh grounded image search
-    if image_query:
-        try:
-            urls = _gemini_image_search(api_key, model, image_query)
-            for u in urls:
-                if _trusted(u):
-                    return u
-        except Exception as e:
-            print(f"[social_ai] grounding image search failed: {e}")
     return None
 
 

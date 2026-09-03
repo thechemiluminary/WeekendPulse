@@ -370,19 +370,99 @@ VERIFICATION STATUS (as of committing):
   project is activated for the Gemini API. Engine still runs (posts text via
   Groq fallback) but WITHOUT real web images until this is fixed.
 
+SOCIAL ENGINE PROVIDER SWITCH TO OPENROUTER (2026-09-03, per user):
+- User created an OpenRouter key (sk-or-v1-...) to REPLACE GEMINI_KEY_SOCIAL,
+  which was stuck at 403 (Gemini API not activated on the 2nd account).
+- IMPORTANT: the key is OpenRouter (openai-compatible), NOT the user's original
+  mistaken "omniroute" label - renamed in secrets.txt.
+- LIV E TEST PASSED:
+    * GET /models with the key -> 200 (key valid).
+    * google/gemini-3.6-flash EXISTS on OpenRouter (same model as before).
+    * chat completion -> 200, finish_reason=stop, clean JSON contract.
+    * social_ai.generate_candidates() -> PROVIDER=openrouter, 4 scored
+      candidates (real pool content), CHUNKS=0, find_image_url=None.
+- OpenRouter does NOT support Google Search Grounding -> social posts are
+  TEXT-ONLY via this path. find_image_url() now always returns None (both
+  OpenRouter and Groq providers are text-only).
+- CODE CHANGED:
+    [ x ] config.py: OPENROUTER_API_KEY / OPENROUTER_BASE_URL
+          (https://openrouter.ai/api/v1) / OPENROUTER_MODEL
+          (google/gemini-3.6-flash) - all env-overridable.
+    [ x ] social_ai.py: _openrouter_generate_candidates() (requests, OpenAI
+          format); provider chain OPENROUTER -> GROQ (Gemini keys dropped as
+          primary); find_image_url() -> always None.
+    [ x ] .github/workflows/collect.yml: env swap GEMINI_KEY_SOCIAL ->
+          OPENROUTER_API_KEY.
+    [ x ] secrets.txt: relabeled "OPENROUTER API", added note to save as GitHub
+          secret OPENROUTER_API_KEY.
+- PENDING USER ACTION: add OPENROUTER_API_KEY to GitHub Actions secrets, then
+  run workflow_dispatch on collect.yml to verify cloud end-to-end (text-only).
+
 NEXT:
-[ ] USER: activate Gemini API on the 2nd account/project behind GEMINI_KEY_SOCIAL
-    (403 = API not enabled; enable it in Google AI Studio / Cloud Console).
-    Re-test grounded image call after activation.
+[ ] USER: add OPENROUTER_API_KEY to GitHub Actions secrets, then workflow_dispatch
+    on collect.yml to verify cloud end-to-end (text-only, OpenRouter).
+[ ] (Optional) Revisit real web images later: Gemini Search Grounding needs an
+    activated Gemini API; no image source on the current OpenRouter path.
 [ ] USER: add a cron-job.org entry firing collect.yml every 5 min.
     (Existing cron-job drives post.yml hourly; create a new cron-job for the
     Social Engine at every 5 min. The 5-min cadence lands exactly on XX:00 /
     XX:30 UK -> gates the 11:30/14:00/15:00/16:00/19:00/20:00 slots.)
-[ ] USER: add GEMINI_KEY_SOCIAL value already saved to GitHub secret (confirmed
-    user added it; API can't read back secret values - trust user save).
 [ ] Live workflow_dispatch test of "WeekendPulse Social Engine" (collect.yml)
     to confirm cloud run end-to-end (should at least collect + possibly post
-    text-only while Gemini key inactive).
+    text-only).
+
+=====================================================================
+PHASE 3e - SEMI-AUTO TELEGRAM SOCIAL MODE (pivot from auto-publish)
+=====================================================================
+PIVOT (2026-09-03, per user): switch the social engine from auto-publish-to-FB
+to SEMI-AUTOMATED. Groq generates the best draft, which is SENT TO THE USER'S
+TELEGRAM. The user manually adds an image and posts to the Facebook page. This
+sidesteps the unsolved real-web-image (Gemini Search Grounding) problem: the
+person adds the photo, not the API.
+
+PROVIDER DECISION (locked):
+- Provider = GROQ ONLY (user has Groq keys; rejected OpenRouter :free, Qwen/
+  Alibaba needs card, Mistral ~1 RPM eval tier, Gemini main key 504ing).
+- Groq uses MULTI-API-KEY ROTATION (GROQ_API_KEY -> _2 -> _3) so a rate-limited/
+  dead key fails over to the next. Only GROQ_API_KEY is set now; _2/_3 dormant.
+- Telegram = Bot API via plain `requests` (no new pip deps). Drafts are sent to
+  TG_CHAT_ID from bot TG_BOT_TOKEN. User manually adds image + posts to FB.
+- SEMI-AUTO drafts are tracked SEPARATELY (social_state "drafts") and do NOT
+  count against the SOCIAL_MAX_PER_DAY=6 cap. They still feed the repetition
+  guard (recent_topics) so future drafts avoid repeat topics/formats.
+
+CODE DONE (2026-09-03):
+[ x ] config.py: GROQ_API_KEY_2/_3, SOCIAL_SEMIAUTO (default "0"), TG_BOT_TOKEN,
+      TG_CHAT_ID
+[ x ] social_ai.py: _groq_keys() + _groq_generate_candidates(prompt, key) +
+      generate_candidates() loops over Groq keys (first success wins)
+[ x ] telegram_sender.py (NEW): send_draft(text) -> Telegram Bot API sendMessage
+[ x ] social_state.py: "drafts" list + track_draft(); recent_topics() includes
+      drafted topics; drafts do NOT bump posted_today
+[ x ] main.py run_social(): branch on SOCIAL_SEMIAUTO -> send_draft + track_draft
+      + set_fired_slot -> {"status":"draft_sent"} (skips auto image/publish).
+      Auto path unchanged.
+[ x ] .github/workflows/collect.yml: SOCIAL_SEMIAUTO=1 + TG_BOT_TOKEN +
+      TG_CHAT_ID + GROQ_API_KEY_2/_3 in social step env
+[ x ] py_compile ALL OK (config, social_ai, social_state, main, telegram_sender)
+
+USER PROVIDED (2026-09-03):
+- Telegram bot: @WeekenedPulseS_bot, token + bot_ID in secrets.txt.
+- TG_CHAT_ID = 8562078249 (CLIENT-SET; NOTE: equals the bot's own ID - should
+  verify via getUpdates that this is the actual recipient chat before relying on
+  it; if sendMessage returns chat not found, get the real chat.id and update the
+  TG_CHAT_ID secret).
+- Groq API already in secrets.txt; user generating extra Groq key(s) -> save as
+  GROQ_API_KEY_2/_3 in secrets.txt + GitHub secrets.
+
+NEXT:
+[ ] USER: verify TG_CHAT_ID actually delivers (message the bot, check getUpdates
+    chat.id). If 8562078249 is wrong, update TG_CHAT_ID secret.
+[ ] USER: add extra Groq key(s) as GROQ_API_KEY_2/_3 (secrets.txt + GH secrets)
+[ ] USER: add TG_BOT_TOKEN + TG_CHAT_ID to GitHub Actions secrets (done per user)
+[ ] Live workflow_dispatch on collect.yml -> confirm a Telegram draft arrives at
+    the next UK slot, and posted_today stays 0 (draft not counted).
+[ ] Manual: user adds image to the draft in Telegram and posts to the FB page.
 
 =====================================================================
 PHASE 4 - MONITORING & REFINEMENT

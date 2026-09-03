@@ -238,10 +238,14 @@ def run_social():
     Generated social post engine. Fires only at the configured UK slots, posts
     at most SOCIAL_MAX_PER_DAY times per day. For each firing:
       1. Gate on UK slot + daily cap.
-      2. Generate N self-scored candidates (Gemini, grounded).
+      2. Generate N self-scored candidates (Groq/OpenRouter, text-only).
       3. Pick the best above threshold.
-      4. Fetch a real web image via grounding (same request, else image search).
-      5. Apply Unicode style markup and publish (image if available, else text).
+      4a. SEMI-AUTO MODE (SOCIAL_SEMIAUTO=1): send the best draft to Telegram
+          (TG_BOT_TOKEN -> TG_CHAT_ID) for the user to add an image and post
+          manually. Drafts are tracked separately and do NOT count toward the
+          daily cap. Nothing is auto-published to Facebook.
+      4b. AUTO MODE: fetch a real web image via grounding, apply Unicode style
+          markup and publish (image if available, else text).
     Returns a result dict.
     """
     import social_ai
@@ -289,7 +293,22 @@ def run_social():
     if not post_text:
         return {"status": "empty_post"}
 
-    # 3. Real web image via grounding.
+    # Semi-auto mode: send draft to Telegram, user manually adds image + posts.
+    if config.SOCIAL_SEMIAUTO:
+        import telegram_sender
+        sent = telegram_sender.send_draft(post_text)
+        social_state.set_fired_slot(slot_key)
+        if not sent:
+            print("[social] SEMI-AUTO draft send FAILED - retrying later slot")
+            return {"status": "draft_send_failed", "provider": provider}
+        social_state.track_draft(best.get("format", ""), best.get("topic", ""),
+                                 post_text)
+        print(f"[social] SEMI-AUTO DRAFT SENT (score={best.get('predicted_engagement')})")
+        return {"status": "draft_sent", "provider": provider,
+                "score": best.get("predicted_engagement"),
+                "format": best.get("format")}
+
+    # 3. Real web image via grounding (auto mode only).
     image_url = ""
     if config.SOCIAL_GROUNDED:
         try:

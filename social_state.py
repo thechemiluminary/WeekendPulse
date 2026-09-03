@@ -28,6 +28,7 @@ def _default():
         "posted_today": 0,
         "pool": [],          # [{text, source, ts_utc, hash}]
         "posted": [],        # [{ts_utc, format, topic, post_text, post_id, image_url}]
+        "drafts": [],        # semi-auto drafts sent to Telegram (NOT counted in posted_today)
         "engagement": [],    # [{post_id, ts_utc, reactions, comments, shares}] appended later
     }
 
@@ -47,6 +48,7 @@ def load():
             data["pool"] = []
             data["today"] = d
         data.setdefault("posted", [])
+        data.setdefault("drafts", [])
         data.setdefault("engagement", [])
         data.setdefault("pool", [])
         return data
@@ -106,6 +108,23 @@ def record_posted(format_label, topic, post_text, post_id=None, image_url=""):
     save(data)
 
 
+def track_draft(format_label, topic, post_text):
+    """Record a semi-auto draft sent to Telegram. Does NOT touch posted_today
+    (drafts don't count toward the daily cap) but still feeds the repetition
+    guard so future drafts avoid repeating this topic/format."""
+    data = load()
+    data["drafts"].append({
+        "ts_utc": datetime.now(timezone.utc).isoformat(),
+        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "format": format_label,
+        "topic": topic,
+        "post_text": post_text,
+    })
+    if len(data["drafts"]) > _MAX_HISTORY:
+        data["drafts"] = data["drafts"][-_MAX_HISTORY:]
+    save(data)
+
+
 def undo_last_posted():
     """Roll back the last recorded post (used if publish actually failed)."""
     data = load()
@@ -122,9 +141,10 @@ def posted_today():
 
 
 def recent_topics(total=25):
-    """Return the most recent posted topic slugs (for the repetition guard)."""
+    """Return the most recent posted/drafted topic slugs (repetition guard)."""
     data = load()
     topics = [r.get("topic", "") for r in data["posted"] if r.get("topic")]
+    topics += [r.get("topic", "") for r in data["drafts"] if r.get("topic")]
     return topics[-total:]
 
 
