@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T19:00:25.824726+00:00",
+  "last_collect_utc": "2026-09-03T19:15:16.537839+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -86,6 +86,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T18:36:03.170245+00:00",
       "hash": "4048122"
+    },
+    {
+      "text": "[BBC] Breaking down Chelsea's staggering 39 summer exits | https://www.reddit.com/r/soccer/comments/1w6gxqt/bbc_breaking_down_chelseas_staggering_39_summer/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T19:15:16.537832+00:00",
+      "hash": "7846572"
     }
   ],
   "posted": [],
@@ -113,7 +119,8 @@
     "6252615",
     "4341126",
     "3538969",
-    "4048122"
+    "4048122",
+    "7846572"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
