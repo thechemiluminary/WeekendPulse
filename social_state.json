@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-03T23:15:18.539458+00:00",
+  "last_collect_utc": "2026-09-03T23:25:15.507670+00:00",
   "today": "2026-09-03",
   "posted_today": 0,
   "pool": [
@@ -122,6 +122,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-03T23:15:18.539448+00:00",
       "hash": "883800"
+    },
+    {
+      "text": "Orlando Pride loan Goalkeeper Anna Moorhouse to Manchester City Women | https://www.reddit.com/r/soccer/comments/1w6nmh8/orlando_pride_loan_goalkeeper_anna_moorhouse_to/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-03T23:25:15.507662+00:00",
+      "hash": "3438574"
     }
   ],
   "posted": [],
@@ -155,7 +161,8 @@
     "1047798",
     "6290206",
     "9724862",
-    "883800"
+    "883800",
+    "3438574"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
