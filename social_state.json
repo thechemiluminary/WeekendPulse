@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T19:40:16.437744+00:00",
+  "last_collect_utc": "2026-09-04T19:55:20.409785+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -242,6 +242,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T19:40:16.437731+00:00",
       "hash": "9420900"
+    },
+    {
+      "text": "London City Lionesses (W) [2] — 0 Manchester United (W) - Daniëlle van de Donk 82' (backheel goal) | https://www.reddit.com/r/soccer/comments/1w7exjs/london_city_lionesses_w_2_0_manchester_united_w/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:55:20.408723+00:00",
+      "hash": "9914186"
+    },
+    {
+      "text": "Alexander Isak's brace (9 minutes) is the earliest a Liverpool player has scored twice in a Premier League game since Maxi Rodríguez in May 2011 (7th minute v Fulham). (Opta) | https://www.reddit.com/r/soccer/comments/1w7euoy/alexander_isaks_brace_9_minutes_is_the_earliest_a/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:55:20.409769+00:00",
+      "hash": "2159020"
     }
   ],
   "posted": [],
@@ -358,7 +370,9 @@
     "733734",
     "8848033",
     "9058096",
-    "9420900"
+    "9420900",
+    "9914186",
+    "2159020"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
