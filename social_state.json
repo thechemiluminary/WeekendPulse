@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T14:00:27.950167+00:00",
+  "last_collect_utc": "2026-09-04T15:00:24.609857+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -196,6 +196,13 @@
       "format": "transfer",
       "topic": "newcastle-diabaté",
       "post_text": "⚡️ NEWCASTLE JUST SIGNED OUSMANE DIABATE! Is this the midfield magic they've been craving? 🔥 𝗡𝗢𝗕𝗢𝗗𝗬 can argue the 21‑year‑old will break the mould. 👉 Do you think Diabaté will become Newcastle's next talisman? #Newcastle #PremierLeague #WeekendPulse"
+    },
+    {
+      "ts_utc": "2026-09-04T15:00:24.609845+00:00",
+      "date": "2026-09-04",
+      "format": "hypothetical",
+      "topic": "pep-newcastle",
+      "post_text": "⚡️ If Pep Guardiola took the helm at Newcastle, would he turn them into a European juggernaut 𝗼𝘃𝗲𝗿𝗻𝗶𝗴𝗵𝘁? 🏆-> Do you believe Pep’s magic would work in the North? #Pep #Newcastle #WeekendPulse"
     }
   ],
   "seen": [
@@ -250,6 +257,6 @@
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
-    "slot": "15:00"
+    "slot": "16:00"
   }
 }
