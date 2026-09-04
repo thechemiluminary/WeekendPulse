@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T13:05:23.155306+00:00",
+  "last_collect_utc": "2026-09-04T13:10:18.118500+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -146,6 +146,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-04T13:00:20.168146+00:00",
       "hash": "2050040"
+    },
+    {
+      "text": "🚨 🇸🇪 Nils Zätterström leaves Sheffield United to join Rakow on loan deal with buy option clause. https://t.co/mLTUUknmYx — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T13:10:18.118490+00:00",
+      "hash": "8096952"
     }
   ],
   "posted": [],
@@ -218,7 +224,8 @@
     "692853",
     "2259943",
     "2518380",
-    "2050040"
+    "2050040",
+    "8096952"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
