@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T09:35:16.083746+00:00",
+  "last_collect_utc": "2026-09-04T09:50:20.152215+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -98,6 +98,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T09:35:16.083736+00:00",
       "hash": "3167644"
+    },
+    {
+      "text": "How Liverpool went from transfer masters to £60m panic pursuits | https://www.reddit.com/r/soccer/comments/1w6zurd/how_liverpool_went_from_transfer_masters_to_60m/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T09:50:20.152206+00:00",
+      "hash": "9163262"
     }
   ],
   "posted": [],
@@ -148,7 +154,8 @@
     "740249",
     "969089",
     "6200138",
-    "3167644"
+    "3167644",
+    "9163262"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
