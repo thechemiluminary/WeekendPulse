@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T00:45:20.098586+00:00",
+  "last_collect_utc": "2026-09-04T04:20:20.819091+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -68,6 +68,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T00:45:20.098576+00:00",
       "hash": "5205923"
+    },
+    {
+      "text": "Barcelona, Atletico, acrimony and Arsenal: The Julian Alvarez transfer saga is not over (Gift Article) | https://www.reddit.com/r/soccer/comments/1w6twuo/barcelona_atletico_acrimony_and_arsenal_the/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T04:20:20.819080+00:00",
+      "hash": "6449880"
     }
   ],
   "posted": [],
@@ -113,7 +119,8 @@
     "4312838",
     "2057327",
     "9417978",
-    "5205923"
+    "5205923",
+    "6449880"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
