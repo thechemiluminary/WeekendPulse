@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T00:00:22.113217+00:00",
+  "last_collect_utc": "2026-09-04T00:10:16.875398+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -56,6 +56,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T00:00:22.113212+00:00",
       "hash": "2057327"
+    },
+    {
+      "text": "Chelsea will go for Julián Álvarez in January. They’ll try a more aggressive seduction strategy to overcome his reluctance to live in England, which ultimately killed the Arsenal option this summer. | https://www.reddit.com/r/soccer/comments/1w6onlk/chelsea_will_go_for_julián_álvarez_in_january/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T00:10:16.875387+00:00",
+      "hash": "9417978"
     }
   ],
   "posted": [],
@@ -99,7 +105,8 @@
     "2464264",
     "4952652",
     "4312838",
-    "2057327"
+    "2057327",
+    "9417978"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
