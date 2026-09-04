@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T19:15:17.186084+00:00",
+  "last_collect_utc": "2026-09-04T19:40:16.437744+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -236,6 +236,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T19:15:17.186071+00:00",
       "hash": "9058096"
+    },
+    {
+      "text": "Premier League's £4 Billion spending spree dwarfs Europe's elite. How are English clubs faring in Champions League and Europa League vs other leagues in the last 15 years? | https://www.reddit.com/r/soccer/comments/1w7ek3j/premier_leagues_4_billion_spending_spree_dwarfs/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:40:16.437731+00:00",
+      "hash": "9420900"
     }
   ],
   "posted": [],
@@ -351,7 +357,8 @@
     "6790210",
     "733734",
     "8848033",
-    "9058096"
+    "9058096",
+    "9420900"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
