@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T15:45:17.721483+00:00",
+  "last_collect_utc": "2026-09-04T16:35:15.572624+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -182,6 +182,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T15:45:17.721472+00:00",
       "hash": "8419893"
+    },
+    {
+      "text": "Emi Martínez will wear the No. 1 shirt from now on. To make it up to fans who have already purchased his No. 26 shirt, Chelsea will arrange for Martínez to personally sign those shirts, provided they  | https://www.reddit.com/r/soccer/comments/1w79auv/emi_martínez_will_wear_the_no_1_shirt_from_now_on/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T16:35:15.572614+00:00",
+      "hash": "6138156"
     }
   ],
   "posted": [],
@@ -274,7 +280,8 @@
     "2789115",
     "1885820",
     "832341",
-    "8419893"
+    "8419893",
+    "6138156"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
