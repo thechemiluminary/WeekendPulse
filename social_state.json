@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T11:05:18.898178+00:00",
+  "last_collect_utc": "2026-09-04T11:40:18.448687+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -116,6 +116,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T11:05:18.898167+00:00",
       "hash": "6416992"
+    },
+    {
+      "text": "Cracovia sign Lasse Nordås on loan from Luton Town | https://www.reddit.com/r/soccer/comments/1w71x5f/cracovia_sign_lasse_nordås_on_loan_from_luton_town/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T11:40:18.448676+00:00",
+      "hash": "8117636"
     }
   ],
   "posted": [],
@@ -176,7 +182,8 @@
     "3167644",
     "9163262",
     "6332977",
-    "6416992"
+    "6416992",
+    "8117636"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
