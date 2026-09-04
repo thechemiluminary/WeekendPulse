@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T13:20:20.665221+00:00",
+  "last_collect_utc": "2026-09-04T14:00:27.950167+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -189,6 +189,13 @@
       "format": "poll",
       "topic": "ipswich-liverpool-first-goal",
       "post_text": "⚽️ 𝗙𝗜𝗥𝗦𝗧 𝗚𝗢𝗔𝗟 alert! Tonight at 19:00 UTC, Ipswich vs Liverpool. Who will score first? 👉 𝗜𝗽𝘀𝘄𝗶𝗰𝗵 or 𝗟𝗶𝘃𝗲𝗿𝗽𝗼𝗼𝗹? #WeekendPulse"
+    },
+    {
+      "ts_utc": "2026-09-04T14:00:27.950152+00:00",
+      "date": "2026-09-04",
+      "format": "transfer",
+      "topic": "newcastle-diabaté",
+      "post_text": "⚡️ NEWCASTLE JUST SIGNED OUSMANE DIABATE! Is this the midfield magic they've been craving? 🔥 𝗡𝗢𝗕𝗢𝗗𝗬 can argue the 21‑year‑old will break the mould. 👉 Do you think Diabaté will become Newcastle's next talisman? #Newcastle #PremierLeague #WeekendPulse"
     }
   ],
   "seen": [
@@ -243,6 +250,6 @@
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
-    "slot": "14:00"
+    "slot": "15:00"
   }
 }
