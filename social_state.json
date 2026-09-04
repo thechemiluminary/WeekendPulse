@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T18:10:16.998129+00:00",
+  "last_collect_utc": "2026-09-04T18:50:20.448417+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -212,6 +212,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-04T18:10:16.998117+00:00",
       "hash": "8919927"
+    },
+    {
+      "text": "Match Thread: Ipswich Town vs Liverpool | Premier League | https://www.reddit.com/r/soccer/comments/1w7d2jt/match_thread_ipswich_town_vs_liverpool_premier/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T18:50:20.448409+00:00",
+      "hash": "6790210"
     }
   ],
   "posted": [],
@@ -316,7 +322,8 @@
     "3695777",
     "3539123",
     "5477701",
-    "8919927"
+    "8919927",
+    "6790210"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
