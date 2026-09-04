@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T05:10:18.957845+00:00",
+  "last_collect_utc": "2026-09-04T06:05:22.154761+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -80,6 +80,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T05:10:18.957833+00:00",
       "hash": "740249"
+    },
+    {
+      "text": "🚨 🔴 ⚪️ Georgian talent Andria Bartishvili can be considered a new Arsenal player. Medical completed, contract set to be signed and deal formally sealed. 🇬🇪 Bartishvili will join #AFC first team in summer 2027 when he turns 18. https://t.co/Kew2ZS8r3i — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T06:05:22.154747+00:00",
+      "hash": "969089"
     }
   ],
   "posted": [],
@@ -127,7 +133,8 @@
     "9417978",
     "5205923",
     "6449880",
-    "740249"
+    "740249",
+    "969089"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
