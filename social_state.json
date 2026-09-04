@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T15:00:24.609857+00:00",
+  "last_collect_utc": "2026-09-04T15:15:19.634390+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -164,6 +164,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T13:20:20.665209+00:00",
       "hash": "2789115"
+    },
+    {
+      "text": "1️⃣ 🇦🇷 Official: Emiliano Dibu Martínez takes shirt number 1 at Chelsea following Robert Sanchez exit. https://t.co/gne6gc8fpc — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T15:15:18.988266+00:00",
+      "hash": "1885820"
+    },
+    {
+      "text": "[Craig Hope] \"Without the Newcastle head coach knowing, journalists stood nearby and watched Jaissle bench press a pair of 25kg dumbbells. ‘Is that all you can lift?’ I offered. A colleague asked if I | https://www.reddit.com/r/soccer/comments/1w7774x/craig_hope_without_the_newcastle_head_coach/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T15:15:19.634378+00:00",
+      "hash": "832341"
     }
   ],
   "posted": [],
@@ -253,7 +265,9 @@
     "2050040",
     "8096952",
     "8683257",
-    "2789115"
+    "2789115",
+    "1885820",
+    "832341"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
