@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T20:00:19.082104+00:00",
+  "last_collect_utc": "2026-09-04T20:05:17.880045+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -260,6 +260,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T20:00:19.082092+00:00",
       "hash": "9215328"
+    },
+    {
+      "text": "[Newcastle United] Leo Shahar joins Portuguese side FC Arouca on loan | https://www.reddit.com/r/soccer/comments/1w7f9ku/newcastle_united_leo_shahar_joins_portuguese_side/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T20:05:17.880036+00:00",
+      "hash": "6018609"
     }
   ],
   "posted": [],
@@ -379,7 +385,8 @@
     "9420900",
     "9914186",
     "2159020",
-    "9215328"
+    "9215328",
+    "6018609"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
