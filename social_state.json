@@ -1,133 +1,61 @@
 {
-  "last_collect_utc": "2026-09-03T23:25:15.507670+00:00",
-  "today": "2026-09-03",
+  "last_collect_utc": "2026-09-04T00:00:22.113217+00:00",
+  "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
     {
-      "text": "🚨 🇳🇱 Manchester United striker Chido Obi has completed his loan move to Willem II after medical in the Netherlands. Deal confirmed, straight loan. https://t.co/z9AyeksqIZ — Fabrizio Romano ( @FabrizioRomano ) Sep 2, 2026",
-      "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T14:17:02.726419+00:00",
-      "hash": "9856639"
+      "text": "Ipswich Town FC vs Liverpool FC - kickoff 2026-09-04T19:00:00Z",
+      "source": "football-data/fixture",
+      "ts_utc": "2026-09-04T00:00:20.698745+00:00",
+      "hash": "fx-ips-vs-liv-2026-09-04"
     },
     {
       "text": "🚨 🇸🇦 Ollie Watkins after his Saudi Pro League debut: “The standard today was as good as the Premier League to be honest”. https://t.co/jMamNfD88x — Fabrizio Romano ( @FabrizioRomano ) Sep 3, 2026",
       "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T14:17:02.740382+00:00",
-      "hash": "6643684"
+      "ts_utc": "2026-09-04T00:00:21.586400+00:00",
+      "hash": "74669"
     },
     {
       "text": "🩵 🏡 Enzo Fernández: “I’m honestly feeling at home at Man City, and that's very important for confidence”. “I want to tell them I’m going to give 100% every day, in every training session, every match, to help this club achieve all its objectives”. https://t.co/KTiGUKpNbk — Fabrizio Romano ( @Fabrizi",
       "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T14:17:02.751351+00:00",
-      "hash": "2582537"
-    },
-    {
-      "text": "Man City just taught Sir Jim Ratcliffe a lesson he'll never forget | https://www.reddit.com/r/soccer/comments/1w66r75/man_city_just_taught_sir_jim_ratcliffe_a_lesson/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.658902+00:00",
-      "hash": "7943171"
-    },
-    {
-      "text": "Brighton had €45m deadline day bid for Leverkusen's Malik Tillman rejected | https://www.reddit.com/r/soccer/comments/1w66kpz/brighton_had_45m_deadline_day_bid_for_leverkusens/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.670869+00:00",
-      "hash": "1960544"
-    },
-    {
-      "text": "A company owned by Chelsea FC Chairman Todd Boehly made a £75,000 donation to Reform UK in May | https://www.reddit.com/r/soccer/comments/1w66gai/a_company_owned_by_chelsea_fc_chairman_todd/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.681838+00:00",
-      "hash": "7529898"
-    },
-    {
-      "text": "[BBC] The Premier League premium is £20m - and that worries European clubs | https://www.reddit.com/r/soccer/comments/1w66dtg/bbc_the_premier_league_premium_is_20m_and_that/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.700788+00:00",
-      "hash": "8636695"
-    },
-    {
-      "text": "[NYT] Canada international defender Luc de Fougerolles is set to join Real Salt Lake on loan from Premier League club Fulham. The 20-year-old will move until January, with an option to extend the arra | https://www.reddit.com/r/soccer/comments/1w664x0/nyt_canada_international_defender_luc_de/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.713755+00:00",
-      "hash": "4912456"
-    },
-    {
-      "text": "Wolves have signed Ivory Coast international Ghislain Konan on a one-year deal. | https://www.reddit.com/r/soccer/comments/1w65yta/wolves_have_signed_ivory_coast_international/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.728716+00:00",
-      "hash": "7523993"
-    },
-    {
-      "text": "Premier League Goal Of The Month For August Nominations. | https://www.reddit.com/r/soccer/comments/1w65u1a/premier_league_goal_of_the_month_for_august/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T14:17:03.743673+00:00",
-      "hash": "3443052"
+      "ts_utc": "2026-09-04T00:00:21.586750+00:00",
+      "hash": "4538420"
     },
     {
       "text": "🚨 🔵 ⚪️ OFFICIAL: Gabriel Martinelli joins Al Hilal on €70m package deal from Arsenal. Record sale for #AFC with also a sell-on clause secured as part of the agreement. The exclusive story on Martinelli added as part of Hilal list, now reality. 🇧🇷 https://t.co/WOjs8Vhk9P — Fabrizio Romano ( @Fabrizio",
       "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T18:12:49.299255+00:00",
-      "hash": "6252615"
+      "ts_utc": "2026-09-04T00:00:21.587204+00:00",
+      "hash": "175108"
     },
     {
       "text": "🚨 ❌ Richarlison has been left out of Tottenham Premier League squad. https://t.co/ItAMJUp7CQ — Fabrizio Romano ( @FabrizioRomano ) Sep 3, 2026",
       "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T18:12:49.299783+00:00",
-      "hash": "4341126"
-    },
-    {
-      "text": "[Alasdair Gold]: De Zerbi leaves last season’s top scorer Richarlison out of Tottenham’s 25-man Premier League squad, with injured Xavi Simons and Wilson Odobert included | https://www.reddit.com/r/soccer/comments/1w6dcvt/alasdair_gold_de_zerbi_leaves_last_seasons_top/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T18:12:49.665351+00:00",
-      "hash": "3538969"
-    },
-    {
-      "text": "[Who Scored] Emiliano Martinez has created more big chances (1) than Aston Villa (0) have this season | https://www.reddit.com/r/soccer/comments/1w6fw7w/who_scored_emiliano_martinez_has_created_more_big/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T18:36:03.170245+00:00",
-      "hash": "4048122"
-    },
-    {
-      "text": "[BBC] Breaking down Chelsea's staggering 39 summer exits | https://www.reddit.com/r/soccer/comments/1w6gxqt/bbc_breaking_down_chelseas_staggering_39_summer/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T19:15:16.537832+00:00",
-      "hash": "7846572"
-    },
-    {
-      "text": "Cracovia sign Eritrea international Siem Eyob-Abraha from Sheffield United U18 | https://www.reddit.com/r/soccer/comments/1w6hgfg/cracovia_sign_eritrea_international_siem/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T19:30:21.842637+00:00",
-      "hash": "6837515"
-    },
-    {
-      "text": "Premier League clubs' home kit | https://www.reddit.com/r/soccer/comments/1w6hd1v/premier_league_clubs_home_kit/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T19:30:21.843196+00:00",
-      "hash": "1047798"
+      "ts_utc": "2026-09-04T00:00:21.587528+00:00",
+      "hash": "5516202"
     },
     {
       "text": "🚨 ❌ OFFICIAL: Federico Chiesa and Wataru Endo have been left out of Liverpool Champions League squad. https://t.co/rmBAjNDvra — Fabrizio Romano ( @FabrizioRomano ) Sep 3, 2026",
       "source": "telegram/FabrizioRomanoTG",
-      "ts_utc": "2026-09-03T21:40:19.250875+00:00",
-      "hash": "6290206"
-    },
-    {
-      "text": "Suso (32) retires from the beautiful game. He stays with Cádiz in a role off the pitch. The Spaniard also played for Liverpool, Almería, Milan, Genoa, Sevilla. | https://www.reddit.com/r/soccer/comments/1w6my7a/suso_32_retires_from_the_beautiful_game_he_stays/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T22:55:18.522620+00:00",
-      "hash": "9724862"
-    },
-    {
-      "text": "Élisa De Almeida signs for Arsenal | Arsenal FC Official Website | https://www.reddit.com/r/soccer/comments/1w6nfn4/élisa_de_almeida_signs_for_arsenal_arsenal_fc/",
-      "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T23:15:18.539448+00:00",
-      "hash": "883800"
+      "ts_utc": "2026-09-04T00:00:21.587838+00:00",
+      "hash": "2464264"
     },
     {
       "text": "Orlando Pride loan Goalkeeper Anna Moorhouse to Manchester City Women | https://www.reddit.com/r/soccer/comments/1w6nmh8/orlando_pride_loan_goalkeeper_anna_moorhouse_to/",
       "source": "reddit/r/soccer",
-      "ts_utc": "2026-09-03T23:25:15.507662+00:00",
-      "hash": "3438574"
+      "ts_utc": "2026-09-04T00:00:22.112469+00:00",
+      "hash": "4952652"
+    },
+    {
+      "text": "Élisa De Almeida signs for Arsenal | Arsenal FC Official Website | https://www.reddit.com/r/soccer/comments/1w6nfn4/élisa_de_almeida_signs_for_arsenal_arsenal_fc/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T00:00:22.112823+00:00",
+      "hash": "4312838"
+    },
+    {
+      "text": "Suso (32) retires from the beautiful game. He stays with Cádiz in a role off the pitch. The Spaniard also played for Liverpool, Almería, Milan, Genoa, Sevilla. | https://www.reddit.com/r/soccer/comments/1w6my7a/suso_32_retires_from_the_beautiful_game_he_stays/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T00:00:22.113212+00:00",
+      "hash": "2057327"
     }
   ],
   "posted": [],
@@ -162,7 +90,16 @@
     "6290206",
     "9724862",
     "883800",
-    "3438574"
+    "3438574",
+    "fx-ips-vs-liv-2026-09-04",
+    "74669",
+    "4538420",
+    "175108",
+    "5516202",
+    "2464264",
+    "4952652",
+    "4312838",
+    "2057327"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
