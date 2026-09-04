@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T18:50:20.448417+00:00",
+  "last_collect_utc": "2026-09-04T19:00:28.962639+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -264,6 +264,13 @@
       "format": "lineup_vote",
       "topic": "liverpool-ipswich-xi",
       "post_text": "🚨 𝗟𝗶𝘃𝗲𝗿𝗽𝗼𝗼𝗹'𝘀 𝘀𝘁𝗮𝗿𝘁𝗶𝗻𝗴 𝗫𝗜 for tonight's clash with Ipswich – can the Reds keep the clean sheet or will Ipswich surprise them? 🔥 Who do you think should start on the right? ⚽️ #Liverpool #Ipswich #WeekendPulse"
+    },
+    {
+      "ts_utc": "2026-09-04T19:00:28.962629+00:00",
+      "date": "2026-09-04",
+      "format": "countdown",
+      "topic": "liverpool-vs-arsenal",
+      "post_text": "📆 𝗠𝗮𝗿𝗸 𝘆𝗼𝘂𝗿 𝗰𝗮𝗹𝗲𝗻𝗱𝗮𝗿: Liverpool vs Arsenal next Sunday – a clash of giants! ⚔️ Who do you think will come out on top? #WeekendPulse #Liverpool #Arsenal"
     }
   ],
   "seen": [
@@ -327,6 +334,6 @@
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
-    "slot": "19:00"
+    "slot": "20:00"
   }
 }
