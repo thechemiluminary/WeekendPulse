@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T06:05:22.154761+00:00",
+  "last_collect_utc": "2026-09-04T08:15:18.315641+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -86,6 +86,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-04T06:05:22.154747+00:00",
       "hash": "969089"
+    },
+    {
+      "text": "Liverpool agree deal to sign Djylian N'Guessan | https://www.reddit.com/r/soccer/comments/1w6y7sx/liverpool_agree_deal_to_sign_djylian_nguessan/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T08:15:18.315632+00:00",
+      "hash": "6200138"
     }
   ],
   "posted": [],
@@ -134,7 +140,8 @@
     "5205923",
     "6449880",
     "740249",
-    "969089"
+    "969089",
+    "6200138"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
