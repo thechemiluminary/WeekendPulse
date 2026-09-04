@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T04:20:20.819091+00:00",
+  "last_collect_utc": "2026-09-04T05:10:18.957845+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -74,6 +74,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T04:20:20.819080+00:00",
       "hash": "6449880"
+    },
+    {
+      "text": "Picture of Erling Haaland during training session with Manchester City | https://www.reddit.com/r/soccer/comments/1w6uxu8/picture_of_erling_haaland_during_training_session/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T05:10:18.957833+00:00",
+      "hash": "740249"
     }
   ],
   "posted": [],
@@ -120,7 +126,8 @@
     "2057327",
     "9417978",
     "5205923",
-    "6449880"
+    "6449880",
+    "740249"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
