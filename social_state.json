@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T15:15:19.634390+00:00",
+  "last_collect_utc": "2026-09-04T15:45:17.721483+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -176,6 +176,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T15:15:19.634378+00:00",
       "hash": "832341"
+    },
+    {
+      "text": "West Ham United statement - Daniel Křetínský has reached an agreement to acquire the requisite number of shares to become the single largest shareholder at the Club. | https://www.reddit.com/r/soccer/comments/1w77yta/west_ham_united_statement_daniel_křetínský_has/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T15:45:17.721472+00:00",
+      "hash": "8419893"
     }
   ],
   "posted": [],
@@ -267,7 +273,8 @@
     "8683257",
     "2789115",
     "1885820",
-    "832341"
+    "832341",
+    "8419893"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
