@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T13:15:19.956176+00:00",
+  "last_collect_utc": "2026-09-04T13:20:20.665221+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -158,6 +158,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-04T13:15:19.956164+00:00",
       "hash": "8683257"
+    },
+    {
+      "text": "Newcastle United have completed the signing of Guinea midfielder Ousmane Diabaté from Turkish Süper Lig side Gençlerbirliği Ankara S.K. | https://www.reddit.com/r/soccer/comments/1w744dg/newcastle_united_have_completed_the_signing_of/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T13:20:20.665209+00:00",
+      "hash": "2789115"
     }
   ],
   "posted": [],
@@ -232,7 +238,8 @@
     "2518380",
     "2050040",
     "8096952",
-    "8683257"
+    "8683257",
+    "2789115"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
