@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T10:15:18.153825+00:00",
+  "last_collect_utc": "2026-09-04T10:30:36.001334+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -121,6 +121,13 @@
       "format": "lineup_vote",
       "topic": "richarlison-squad-exclusion",
       "post_text": "🔥 𝗥𝗜𝗖𝗛𝗔𝗥𝗟𝗜𝗦𝗢𝗡 𝗢𝗨𝗧 of Tottenham's squad! The top scorer of last season is left out while injured stars get a slot. Is De Zerbi playing favourites or is it a tactical gamble? Who do you think should have been in the squad? -> Drop your verdict! #WeekendPulse #Richarlison"
+    },
+    {
+      "ts_utc": "2026-09-04T10:30:36.001323+00:00",
+      "date": "2026-09-04",
+      "format": "transfer",
+      "topic": "liverpool_transfer_crisis",
+      "post_text": "⚡️Liverpool's transfer saga is 𝗨𝗣𝗦𝗘𝗧 again! They went from masters to a £60m panic chase, and now they’ve locked in Djylian N'Guessan. Is this a sign they’re 𝗥𝗨𝗡𝗡𝗜𝗡𝗚 𝗢𝗨𝗧 𝗢𝗙 𝗢𝗣𝗧𝗜𝗢𝗡𝗦 or just a bold new strategy? Who’s your pick for the next big signing? 🤔 #WeekendPulse #Liverpool #TransferTalk"
     }
   ],
   "seen": [
@@ -165,7 +172,7 @@
     "6332977"
   ],
   "last_fired_slot": {
-    "date": "2026-09-03",
-    "slot": "20:00"
+    "date": "2026-09-04",
+    "slot": "11:30"
   }
 }
