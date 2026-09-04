@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T16:45:18.751526+00:00",
+  "last_collect_utc": "2026-09-04T17:50:18.501545+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -194,6 +194,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T16:45:18.751517+00:00",
       "hash": "3695777"
+    },
+    {
+      "text": "Arsenal are favourites to win the Champions League in 2026-27, with more than one-fifth (21.2%) of the simulations ending in glory. The likeliest threat to Arteta’s side is Bayern, who won only slight | https://www.reddit.com/r/soccer/comments/1w7bf64/arsenal_are_favourites_to_win_the_champions/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T17:50:18.501535+00:00",
+      "hash": "3539123"
     }
   ],
   "posted": [],
@@ -288,7 +294,8 @@
     "832341",
     "8419893",
     "6138156",
-    "3695777"
+    "3695777",
+    "3539123"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
