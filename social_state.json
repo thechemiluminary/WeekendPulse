@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T16:35:15.572624+00:00",
+  "last_collect_utc": "2026-09-04T16:45:18.751526+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -188,6 +188,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T16:35:15.572614+00:00",
       "hash": "6138156"
+    },
+    {
+      "text": "[BBC] Southampton head coach Tonda Eckert says Aaron Ramsdale still has a role at the club to \"support the team\" despite becoming their fourth-choice goalkeeper | https://www.reddit.com/r/soccer/comments/1w79mef/bbc_southampton_head_coach_tonda_eckert_says/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T16:45:18.751517+00:00",
+      "hash": "3695777"
     }
   ],
   "posted": [],
@@ -281,7 +287,8 @@
     "1885820",
     "832341",
     "8419893",
-    "6138156"
+    "6138156",
+    "3695777"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
