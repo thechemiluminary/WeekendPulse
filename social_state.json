@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T13:10:18.118500+00:00",
+  "last_collect_utc": "2026-09-04T13:15:19.956176+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -152,6 +152,12 @@
       "source": "telegram/FabrizioRomanoTG",
       "ts_utc": "2026-09-04T13:10:18.118490+00:00",
       "hash": "8096952"
+    },
+    {
+      "text": "🚨 🇧🇷 Roberto De Zerbi confirms Richarlison did not accept Everton proposal: “I don’t know if there is an offer from Turkey… but aI know there was an offer before the end of the transfer market but he did not accept that offer”. “For me nothing changes”. https://t.co/PnrLVWOeAk — Fabrizio Romano ( @F",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T13:15:19.956164+00:00",
+      "hash": "8683257"
     }
   ],
   "posted": [],
@@ -225,7 +231,8 @@
     "2259943",
     "2518380",
     "2050040",
-    "8096952"
+    "8096952",
+    "8683257"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
