@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T19:10:18.998609+00:00",
+  "last_collect_utc": "2026-09-04T19:15:17.186084+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -230,6 +230,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T19:10:18.998601+00:00",
       "hash": "8848033"
+    },
+    {
+      "text": "Former Liverpool footballer Jordon Ibe has avoided jail after being sentenced for assaulting his ex-partner during an argument in which he pulled a braid out of her hair. | https://www.reddit.com/r/soccer/comments/1w7dus8/former_liverpool_footballer_jordon_ibe_has/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:15:17.186071+00:00",
+      "hash": "9058096"
     }
   ],
   "posted": [],
@@ -344,7 +350,8 @@
     "8919927",
     "6790210",
     "733734",
-    "8848033"
+    "8848033",
+    "9058096"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
