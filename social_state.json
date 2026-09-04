@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T11:40:18.448687+00:00",
+  "last_collect_utc": "2026-09-04T12:30:26.924284+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -122,6 +122,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T11:40:18.448676+00:00",
       "hash": "8117636"
+    },
+    {
+      "text": "🚨 🔵 ⚪️ Brighton manager Fabian Hürzeler on Yankuba Minteh not joining Liverpool: “If the whole team is successful, Yankuba will get a lot of attention again and he can then maybe fulfil his dream in the next transfer window”. https://t.co/tuFszsYXWt — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T12:30:26.434197+00:00",
+      "hash": "692853"
+    },
+    {
+      "text": "Premier League's £4 Billion spending spree dwarfs Europe's elite. The transfer market paints a picture of an increasingly divided football landscape: on one side, the immense financial power of Englis | https://www.reddit.com/r/soccer/comments/1w7308v/premier_leagues_4_billion_spending_spree_dwarfs/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T12:30:26.924272+00:00",
+      "hash": "2259943"
     }
   ],
   "posted": [],
@@ -183,7 +195,9 @@
     "9163262",
     "6332977",
     "6416992",
-    "8117636"
+    "8117636",
+    "692853",
+    "2259943"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
