@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T10:30:36.001334+00:00",
+  "last_collect_utc": "2026-09-04T11:05:18.898178+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -110,6 +110,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T10:15:18.153815+00:00",
       "hash": "6332977"
+    },
+    {
+      "text": "Gabriel Martinelli leaves Arsenal for Saudi Arabian club Al-Hilal in £60m deal | https://www.reddit.com/r/soccer/comments/1w7182z/gabriel_martinelli_leaves_arsenal_for_saudi/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T11:05:18.898167+00:00",
+      "hash": "6416992"
     }
   ],
   "posted": [],
@@ -169,7 +175,8 @@
     "6200138",
     "3167644",
     "9163262",
-    "6332977"
+    "6332977",
+    "6416992"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
