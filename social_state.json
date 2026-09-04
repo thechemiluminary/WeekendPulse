@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T18:00:21.856595+00:00",
+  "last_collect_utc": "2026-09-04T18:05:25.955094+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -245,6 +245,13 @@
       "format": "hypothetical",
       "topic": "pep-newcastle",
       "post_text": "⚡️ If Pep Guardiola took the helm at Newcastle, would he turn them into a European juggernaut 𝗼𝘃𝗲𝗿𝗻𝗶𝗴𝗵𝘁? 🏆-> Do you believe Pep’s magic would work in the North? #Pep #Newcastle #WeekendPulse"
+    },
+    {
+      "ts_utc": "2026-09-04T18:05:25.955082+00:00",
+      "date": "2026-09-04",
+      "format": "lineup_vote",
+      "topic": "liverpool-ipswich-xi",
+      "post_text": "🚨 𝗟𝗶𝘃𝗲𝗿𝗽𝗼𝗼𝗹'𝘀 𝘀𝘁𝗮𝗿𝘁𝗶𝗻𝗴 𝗫𝗜 for tonight's clash with Ipswich – can the Reds keep the clean sheet or will Ipswich surprise them? 🔥 Who do you think should start on the right? ⚽️ #Liverpool #Ipswich #WeekendPulse"
     }
   ],
   "seen": [
@@ -306,6 +313,6 @@
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
-    "slot": "16:00"
+    "slot": "19:00"
   }
 }
