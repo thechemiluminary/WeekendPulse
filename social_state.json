@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T08:15:18.315641+00:00",
+  "last_collect_utc": "2026-09-04T09:35:16.083746+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -92,6 +92,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T08:15:18.315632+00:00",
       "hash": "6200138"
+    },
+    {
+      "text": "Ref Cam: Liverpool v Nottingham Forest feat offside and penalty call by Samuel Barrott | https://www.reddit.com/r/soccer/comments/1w6zk3n/ref_cam_liverpool_v_nottingham_forest_feat/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T09:35:16.083736+00:00",
+      "hash": "3167644"
     }
   ],
   "posted": [],
@@ -141,7 +147,8 @@
     "6449880",
     "740249",
     "969089",
-    "6200138"
+    "6200138",
+    "3167644"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
