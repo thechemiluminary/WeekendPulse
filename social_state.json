@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T19:00:28.962639+00:00",
+  "last_collect_utc": "2026-09-04T19:10:18.998609+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -218,6 +218,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T18:50:20.448409+00:00",
       "hash": "6790210"
+    },
+    {
+      "text": "Ipswich 0 - [2] Liverpool - A. Isak 9' | https://www.reddit.com/r/soccer/comments/1w7dpwl/ipswich_0_2_liverpool_a_isak_9/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:10:18.997651+00:00",
+      "hash": "733734"
+    },
+    {
+      "text": "Ipswich 0 - [1] Liverpool - A. Isak 6' | https://www.reddit.com/r/soccer/comments/1w7dn8a/ipswich_0_1_liverpool_a_isak_6/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T19:10:18.998601+00:00",
+      "hash": "8848033"
     }
   ],
   "posted": [],
@@ -330,7 +342,9 @@
     "3539123",
     "5477701",
     "8919927",
-    "6790210"
+    "6790210",
+    "733734",
+    "8848033"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
