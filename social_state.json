@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T18:05:25.955094+00:00",
+  "last_collect_utc": "2026-09-04T18:10:16.998129+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -206,6 +206,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T18:00:21.856586+00:00",
       "hash": "5477701"
+    },
+    {
+      "text": "🔴 🇺🇾 Ronald Araujo starts at right back for Liverpool tonight. One of the key reasons why #LFC proceeded with the signing, convinced he can cover both RB and CB positions. https://t.co/G75qQ3FLKx — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T18:10:16.998117+00:00",
+      "hash": "8919927"
     }
   ],
   "posted": [],
@@ -309,7 +315,8 @@
     "6138156",
     "3695777",
     "3539123",
-    "5477701"
+    "5477701",
+    "8919927"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
