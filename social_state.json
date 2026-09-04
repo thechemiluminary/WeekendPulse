@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T13:00:20.168153+00:00",
+  "last_collect_utc": "2026-09-04T13:05:23.155306+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -164,6 +164,13 @@
       "format": "transfer",
       "topic": "liverpool_transfer_crisis",
       "post_text": "⚡️Liverpool's transfer saga is 𝗨𝗣𝗦𝗘𝗧 again! They went from masters to a £60m panic chase, and now they’ve locked in Djylian N'Guessan. Is this a sign they’re 𝗥𝗨𝗡𝗡𝗜𝗡𝗚 𝗢𝗨𝗧 𝗢𝗙 𝗢𝗣𝗧𝗜𝗢𝗡𝗦 or just a bold new strategy? Who’s your pick for the next big signing? 🤔 #WeekendPulse #Liverpool #TransferTalk"
+    },
+    {
+      "ts_utc": "2026-09-04T13:05:23.155293+00:00",
+      "date": "2026-09-04",
+      "format": "poll",
+      "topic": "ipswich-liverpool-first-goal",
+      "post_text": "⚽️ 𝗙𝗜𝗥𝗦𝗧 𝗚𝗢𝗔𝗟 alert! Tonight at 19:00 UTC, Ipswich vs Liverpool. Who will score first? 👉 𝗜𝗽𝘀𝘄𝗶𝗰𝗵 or 𝗟𝗶𝘃𝗲𝗿𝗽𝗼𝗼𝗹? #WeekendPulse"
     }
   ],
   "seen": [
@@ -215,6 +222,6 @@
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
-    "slot": "11:30"
+    "slot": "14:00"
   }
 }
