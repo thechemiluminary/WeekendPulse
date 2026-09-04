@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T12:30:26.924284+00:00",
+  "last_collect_utc": "2026-09-04T13:00:20.168153+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -134,6 +134,18 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T12:30:26.924272+00:00",
       "hash": "2259943"
+    },
+    {
+      "text": "🚨 🩵 OFFICIAL: Manchester City captains announced by Enzo Maresca. ©️ Ruben Dias ©️ Erling Haaland ©️ Marc Guehi ©️ Gianluigi Donnarumma https://t.co/Qz4L67NAJ8 — Fabrizio Romano ( @FabrizioRomano ) Sep 4, 2026",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T13:00:20.167487+00:00",
+      "hash": "2518380"
+    },
+    {
+      "text": "🚨 🇦🇷 Xabi Alonso on Enzo leaving Chelsea. “We take all the decisions together. We work together in every decision - big or small”. “We knew, ultimately, the goal is to have the best for the team and squad. We want to build a good spirit and team”. https://t.co/a0ecKrOUir — Fabrizio Romano ( @Fabrizi",
+      "source": "telegram/FabrizioRomanoTG",
+      "ts_utc": "2026-09-04T13:00:20.168146+00:00",
+      "hash": "2050040"
     }
   ],
   "posted": [],
@@ -197,7 +209,9 @@
     "6416992",
     "8117636",
     "692853",
-    "2259943"
+    "2259943",
+    "2518380",
+    "2050040"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
