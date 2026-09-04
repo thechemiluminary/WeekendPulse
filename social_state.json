@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T09:50:20.152215+00:00",
+  "last_collect_utc": "2026-09-04T10:15:18.153825+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -104,6 +104,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T09:50:20.152206+00:00",
       "hash": "9163262"
+    },
+    {
+      "text": "[Kieran Maguire] Premier League squad costs for 26/27 season | https://www.reddit.com/r/soccer/comments/1w708uz/kieran_maguire_premier_league_squad_costs_for/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T10:15:18.153815+00:00",
+      "hash": "6332977"
     }
   ],
   "posted": [],
@@ -155,7 +161,8 @@
     "969089",
     "6200138",
     "3167644",
-    "9163262"
+    "9163262",
+    "6332977"
   ],
   "last_fired_slot": {
     "date": "2026-09-03",
