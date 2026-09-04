@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T17:50:18.501545+00:00",
+  "last_collect_utc": "2026-09-04T18:00:21.856595+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -200,6 +200,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T17:50:18.501535+00:00",
       "hash": "3539123"
+    },
+    {
+      "text": "Chelsea announce that Emi Martinez has switched from No. 26 to the No. 1 shirt after the departure of Robert Sanchez on loan to Como. In recognition to those affected, Martinez is offering to sign all | https://www.reddit.com/r/soccer/comments/1w7bnfv/chelsea_announce_that_emi_martinez_has_switched/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T18:00:21.856586+00:00",
+      "hash": "5477701"
     }
   ],
   "posted": [],
@@ -295,7 +301,8 @@
     "8419893",
     "6138156",
     "3695777",
-    "3539123"
+    "3539123",
+    "5477701"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
