@@ -1,5 +1,5 @@
 {
-  "last_collect_utc": "2026-09-04T19:55:20.409785+00:00",
+  "last_collect_utc": "2026-09-04T20:00:19.082104+00:00",
   "today": "2026-09-04",
   "posted_today": 0,
   "pool": [
@@ -254,6 +254,12 @@
       "source": "reddit/r/soccer",
       "ts_utc": "2026-09-04T19:55:20.409769+00:00",
       "hash": "2159020"
+    },
+    {
+      "text": "Liverpool penalty shout against Ipswich | https://www.reddit.com/r/soccer/comments/1w7f0yq/liverpool_penalty_shout_against_ipswich/",
+      "source": "reddit/r/soccer",
+      "ts_utc": "2026-09-04T20:00:19.082092+00:00",
+      "hash": "9215328"
     }
   ],
   "posted": [],
@@ -372,7 +378,8 @@
     "9058096",
     "9420900",
     "9914186",
-    "2159020"
+    "2159020",
+    "9215328"
   ],
   "last_fired_slot": {
     "date": "2026-09-04",
